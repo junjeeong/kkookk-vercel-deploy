@@ -1,18 +1,15 @@
 /**
- * LauncherPage Component
- * Development launcher page for selecting app mode
+ * LauncherPage 컴포넌트
+ * 앱 모드 선택을 위한 개발용 런처 페이지
  */
 
+import { useNavigate } from 'react-router-dom';
 import { Smartphone, Tablet, Monitor } from 'lucide-react';
 import { LauncherCard } from '@/components/shared/LauncherCard';
 
-type ViewMode = 'launcher' | 'customer' | 'store' | 'admin';
+export function LauncherPage() {
+  const navigate = useNavigate();
 
-interface LauncherPageProps {
-  onSelectMode: (mode: ViewMode) => void;
-}
-
-export function LauncherPage({ onSelectMode }: LauncherPageProps) {
   return (
     <div className="min-h-screen bg-kkookk-sand flex flex-col items-center justify-center p-6">
       <h1 className="text-3xl font-bold text-kkookk-navy mb-2">
@@ -27,21 +24,21 @@ export function LauncherPage({ onSelectMode }: LauncherPageProps) {
           icon={<Smartphone size={40} />}
           title="고객용 PWA"
           desc="스탬프 적립, 리워드 확인, 적립 요청"
-          onClick={() => onSelectMode('customer')}
+          onClick={() => navigate('/customer')}
           color="bg-kkookk-orange-500"
         />
         <LauncherCard
           icon={<Tablet size={40} />}
           title="매장용 태블릿"
           desc="적립/사용 요청 실시간 승인, 영업 관리"
-          onClick={() => onSelectMode('store')}
+          onClick={() => navigate('/terminal/store-1')}
           color="bg-kkookk-navy"
         />
         <LauncherCard
           icon={<Monitor size={40} />}
           title="사장님 백오피스"
           desc="스탬프 카드 설계, 스토어 관리"
-          onClick={() => onSelectMode('admin')}
+          onClick={() => navigate('/owner/stores')}
           color="bg-kkookk-steel"
         />
       </div>

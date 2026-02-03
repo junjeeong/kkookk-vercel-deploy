@@ -1,6 +1,6 @@
 /**
- * RequestResultView Component
- * Result view after stamp request is processed
+ * RequestResultView 컴포넌트
+ * 스탬프 요청 처리 후 결과 화면
  */
 
 import { Check, X } from 'lucide-react';

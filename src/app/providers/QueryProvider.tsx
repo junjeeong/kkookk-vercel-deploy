@@ -1,16 +1,16 @@
 /**
- * QueryProvider Component
- * TanStack Query provider configuration
+ * QueryProvider 컴포넌트
+ * TanStack Query 프로바이더 설정
  */
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 
-// Configure QueryClient with optimal settings
+// 최적화된 설정으로 QueryClient 구성
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000, // 5분
       retry: 1,
       refetchOnWindowFocus: false,
     },

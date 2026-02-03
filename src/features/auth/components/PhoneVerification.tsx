@@ -1,6 +1,6 @@
 /**
- * PhoneVerification Component
- * OTP verification form for phone number confirmation
+ * PhoneVerification 컴포넌트
+ * 휴대폰 번호 확인을 위한 OTP 인증 폼
  */
 
 import { useState } from 'react';

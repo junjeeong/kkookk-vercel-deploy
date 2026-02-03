@@ -1,24 +1,25 @@
 /**
- * CustomerHistoryPage Component
- * Activity history page for customer
+ * CustomerHistoryPage 컴포넌트
+ * 고객 활동 이력 페이지
  */
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, History, Check, X, Gift } from 'lucide-react';
 import { formatFullDateTime } from '@/lib/utils/format';
+import { MOCK_REQUESTS } from '@/lib/constants/mockData';
 import type { IssuanceRequest } from '@/types/domain';
 
 interface CustomerHistoryPageProps {
-  requests: IssuanceRequest[];
-  onBack: () => void;
+  requests?: IssuanceRequest[];
 }
 
 type HistoryFilter = 'all' | 'stamp' | 'reward';
 
 export function CustomerHistoryPage({
-  requests,
-  onBack,
+  requests = MOCK_REQUESTS,
 }: CustomerHistoryPageProps) {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<HistoryFilter>('all');
 
   const filteredRequests = requests
@@ -33,11 +34,11 @@ export function CustomerHistoryPage({
 
   return (
     <div className="h-full bg-white flex flex-col">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-100 flex items-center sticky top-0 bg-white z-10 justify-between">
+      {/* 헤더 */}
+      <div className="px-6 py-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center sticky top-0 bg-white z-10 justify-between">
         <div className="flex items-center">
           <button
-            onClick={onBack}
+            onClick={() => navigate('/customer/wallet')}
             className="p-2 -ml-2 text-kkookk-steel hover:text-kkookk-navy"
             aria-label="뒤로 가기"
           >
@@ -47,7 +48,7 @@ export function CustomerHistoryPage({
         </div>
       </div>
 
-      {/* Filters */}
+      {/* 필터 */}
       <div className="px-6 py-4 border-b border-slate-50 flex gap-2">
         {(['all', 'stamp', 'reward'] as const).map((f) => (
           <button
@@ -68,7 +69,7 @@ export function CustomerHistoryPage({
         ))}
       </div>
 
-      {/* List */}
+      {/* 목록 */}
       <div className="flex-1 overflow-y-auto px-6">
         {filteredRequests.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-kkookk-steel">

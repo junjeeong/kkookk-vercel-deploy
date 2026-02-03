@@ -1,6 +1,6 @@
 /**
- * RequestingView Component
- * Polling/waiting view while stamp request is pending
+ * RequestingView 컴포넌트
+ * 스탬프 요청 대기 중 폴링/대기 화면
  */
 
 import { Loader2, TestTube } from 'lucide-react';
@@ -9,7 +9,7 @@ import { formatCountdown } from '@/lib/utils/format';
 interface RequestingViewProps {
   requestId: string;
   remainingSeconds?: number;
-  /** For dev simulation only */
+  /** 개발 시뮬레이션 전용 */
   onSimulateApprove?: () => void;
   onSimulateReject?: () => void;
   showDevControls?: boolean;
@@ -34,12 +34,12 @@ export function RequestingView({
         <p className="text-xs text-white/40">요청번호 #{requestId.slice(-6)}</p>
       </div>
 
-      {/* Developer Simulation Controls */}
+      {/* 개발자 시뮬레이션 컨트롤 */}
       {showDevControls && (
         <div className="bg-white/10 rounded-2xl p-4 mb-8 backdrop-blur-sm border border-white/10">
           <div className="flex items-center justify-center gap-2 mb-3 text-white/60 text-xs font-medium">
             <TestTube size={14} />
-            <span>Developer Simulation Mode</span>
+            <span>개발자 시뮬레이션 모드</span>
           </div>
           <div className="flex gap-3">
             <button

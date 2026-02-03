@@ -1,6 +1,6 @@
 /**
- * LauncherCard Component
- * Card component for the launcher page to select different app modes
+ * LauncherCard 컴포넌트
+ * 런처 페이지에서 다양한 앱 모드를 선택하기 위한 카드 컴포넌트
  */
 
 import type { ReactNode } from 'react';

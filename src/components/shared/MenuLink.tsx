@@ -1,6 +1,6 @@
 /**
- * MenuLink Component
- * Navigation link item for side menus
+ * MenuLink 컴포넌트
+ * 사이드 메뉴용 네비게이션 링크 아이템
  */
 
 import type { ReactNode } from 'react';

@@ -1,6 +1,6 @@
 /**
- * QRPosterModal Component
- * Modal for displaying and downloading QR poster for store
+ * QRPosterModal 컴포넌트
+ * 매장용 QR 포스터 표시 및 다운로드 모달
  */
 
 import { QrCode, Smartphone, Check, Download, X } from 'lucide-react';
@@ -23,7 +23,7 @@ export function QRPosterModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop */}
+      {/* 배경 오버레이 */}
       <div
         role="button"
         tabIndex={0}
@@ -38,9 +38,9 @@ export function QRPosterModal({
         }}
       />
 
-      {/* Modal */}
+      {/* 모달 */}
       <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in-95">
-        {/* Header */}
+        {/* 헤더 */}
         <div className="p-6 border-b border-slate-100 flex justify-between items-center">
           <h3 className="font-bold text-lg text-kkookk-navy">
             QR 포스터 미리보기
@@ -54,7 +54,7 @@ export function QRPosterModal({
           </button>
         </div>
 
-        {/* Preview */}
+        {/* 미리보기 */}
         <div className="p-8 bg-slate-50 flex justify-center">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 text-center w-full aspect-[3/4] flex flex-col items-center justify-center">
             <h4 className="font-bold text-xl text-kkookk-navy mb-1">
@@ -75,7 +75,7 @@ export function QRPosterModal({
           </div>
         </div>
 
-        {/* Footer */}
+        {/* 푸터 */}
         <div className="p-6 bg-white border-t border-slate-100">
           <p className="text-center text-sm text-kkookk-steel mb-4 flex items-center justify-center gap-2">
             <Check size={14} className="text-green-500" /> 프린트 후 매장에

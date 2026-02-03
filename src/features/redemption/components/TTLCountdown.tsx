@@ -1,6 +1,6 @@
 /**
- * TTLCountdown Component
- * Countdown timer for redemption session TTL (30-60 seconds)
+ * TTLCountdown 컴포넌트
+ * 리딤 세션 TTL 카운트다운 타이머 (30-60초)
  */
 
 import { formatCountdown } from '@/lib/utils/format';

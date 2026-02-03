@@ -1,6 +1,6 @@
 /**
- * WalletHeader Component
- * Header for the wallet page with menu toggle
+ * WalletHeader 컴포넌트
+ * 메뉴 토글이 있는 지갑 페이지 헤더
  */
 
 import { Menu } from 'lucide-react';
@@ -15,7 +15,7 @@ export function WalletHeader({
   onMenuClick,
 }: WalletHeaderProps) {
   return (
-    <div className="flex justify-between items-center px-6 pt-12 pb-4">
+    <div className="flex justify-between items-center px-6 pt-12 pb-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
       <h1 className="text-2xl font-bold text-kkookk-navy">{title}</h1>
       <button
         onClick={onMenuClick}

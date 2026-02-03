@@ -1,6 +1,6 @@
 /**
- * StatisticsModal Component
- * Modal for displaying store/card statistics with charts and KPIs
+ * StatisticsModal 컴포넌트
+ * 차트와 KPI를 포함한 매장/카드 통계를 표시하는 모달
  */
 
 import { X, Check, Gift, Coffee, TrendingUp, Calendar, Users } from 'lucide-react';
@@ -114,7 +114,7 @@ export function StatisticsModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-8">
-      {/* Backdrop */}
+      {/* 배경 오버레이 */}
       <div
         role="button"
         tabIndex={0}
@@ -129,7 +129,7 @@ export function StatisticsModal({
         }}
       />
 
-      {/* Modal Container */}
+      {/* 모달 컨테이너 */}
       <div
         className={cn(
           'relative bg-white rounded-3xl shadow-2xl w-full max-w-4xl h-[85vh]',
@@ -137,7 +137,7 @@ export function StatisticsModal({
           className
         )}
       >
-        {/* Header */}
+        {/* 헤더 */}
         <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-white z-10">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -157,9 +157,9 @@ export function StatisticsModal({
           </button>
         </div>
 
-        {/* Content */}
+        {/* 콘텐츠 */}
         <div className="flex-1 overflow-y-auto p-8 bg-kkookk-sand/30">
-          {/* KPI Cards */}
+          {/* KPI 카드들 */}
           <div className="grid grid-cols-4 gap-4 mb-8">
             <KPICard
               icon={<Check size={20} />}
@@ -192,7 +192,7 @@ export function StatisticsModal({
           </div>
 
           <div className="grid grid-cols-3 gap-6">
-            {/* Weekly Chart */}
+            {/* 주간 차트 */}
             <div className="col-span-2 bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
               <h3 className="font-bold text-lg text-kkookk-navy mb-6 flex items-center gap-2">
                 <Calendar size={18} className="text-slate-400" />
@@ -201,7 +201,7 @@ export function StatisticsModal({
               <WeeklyChart data={stats.weeklyData} />
             </div>
 
-            {/* Customer Analysis */}
+            {/* 고객 분석 */}
             <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm flex flex-col">
               <h3 className="font-bold text-lg text-kkookk-navy mb-6 flex items-center gap-2">
                 <Users size={18} className="text-slate-400" />

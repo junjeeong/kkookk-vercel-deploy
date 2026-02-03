@@ -1,6 +1,6 @@
 /**
- * StoreCard Component
- * Store card display in owner backoffice
+ * StoreCard 컴포넌트
+ * 사장님 백오피스의 매장 카드 표시
  */
 
 import { Store, MapPin, QrCode, ArrowRight } from 'lucide-react';

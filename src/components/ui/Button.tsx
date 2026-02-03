@@ -1,6 +1,6 @@
 /**
- * Button Component
- * Primary button component with variants following KKOOKK design system
+ * Button 컴포넌트
+ * KKOOKK 디자인 시스템을 따르는 다양한 변형을 가진 기본 버튼 컴포넌트
  */
 
 import { forwardRef, type ButtonHTMLAttributes } from 'react';

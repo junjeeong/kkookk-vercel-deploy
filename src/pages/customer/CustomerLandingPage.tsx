@@ -1,22 +1,21 @@
 /**
- * CustomerLandingPage Component
- * Landing page for customer app when scanning QR
+ * CustomerLandingPage 컴포넌트
+ * QR 스캔 시 표시되는 고객 앱 랜딩 페이지
  */
 
+import { useNavigate } from 'react-router-dom';
 import { QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 interface CustomerLandingPageProps {
-  storeName: string;
-  onLogin: () => void;
-  onSignup: () => void;
+  storeName?: string;
 }
 
 export function CustomerLandingPage({
-  storeName,
-  onLogin,
-  onSignup,
+  storeName = '카페 루나',
 }: CustomerLandingPageProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="h-full flex flex-col items-center justify-center p-8 bg-white text-center">
       <div className="flex flex-col items-center flex-1 justify-center -mt-10">
@@ -37,7 +36,7 @@ export function CustomerLandingPage({
       </div>
       <div className="w-full mt-auto pb-8">
         <Button
-          onClick={onLogin}
+          onClick={() => navigate('/customer/login')}
           variant="primary"
           size="full"
           className="shadow-lg shadow-orange-200"
@@ -45,7 +44,7 @@ export function CustomerLandingPage({
           내 지갑 열기
         </Button>
         <button
-          onClick={onSignup}
+          onClick={() => navigate('/customer/signup')}
           className="mt-4 text-sm text-kkookk-steel/60 hover:text-kkookk-steel underline decoration-kkookk-steel/30 underline-offset-4"
         >
           처음이신가요?

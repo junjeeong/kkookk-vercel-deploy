@@ -1,6 +1,6 @@
 /**
- * Input Component
- * Form input component following KKOOKK design system
+ * Input 컴포넌트
+ * KKOOKK 디자인 시스템을 따르는 폼 입력 컴포넌트
  */
 
 import { forwardRef, type InputHTMLAttributes } from 'react';

@@ -1,6 +1,6 @@
 /**
- * LoginForm Component
- * Email/password login form for owner accounts
+ * LoginForm 컴포넌트
+ * 사장님 계정용 이메일/비밀번호 로그인 폼
  */
 
 import { useState } from 'react';

@@ -1,6 +1,6 @@
 /**
- * ProcessedHistory Component
- * History table of processed requests
+ * ProcessedHistory 컴포넌트
+ * 처리된 요청 히스토리 테이블
  */
 
 import { formatTime, maskPhone } from '@/lib/utils/format';

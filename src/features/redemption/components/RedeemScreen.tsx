@@ -1,31 +1,36 @@
 /**
- * RedeemScreen Component
- * Main redemption screen with TTL countdown and staff confirmation
+ * RedeemScreen 컴포넌트
+ * TTL 카운트다운 및 직원 확인 기능이 포함된 메인 리딤 화면
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { TestTube } from 'lucide-react';
 import { TTLCountdown } from './TTLCountdown';
 import { StaffConfirmModal } from './StaffConfirmModal';
 import { Button } from '@/components/ui/Button';
 import { REDEEM_TTL_SECONDS } from '../types';
-import type { Reward } from '@/types/domain';
 
 interface RedeemScreenProps {
-  _reward?: Reward;
-  onComplete: (success: boolean) => void;
   showDevControls?: boolean;
 }
 
 export function RedeemScreen({
-  onComplete,
   showDevControls = true,
 }: RedeemScreenProps) {
+  const navigate = useNavigate();
+  const { redeemId } = useParams<{ redeemId: string }>();
+
+  const handleComplete = useCallback((success: boolean) => {
+    // TODO: API 연동 후 실제 처리
+    console.log('Redeem completed:', redeemId, success);
+    navigate('/customer/redeems');
+  }, [navigate, redeemId]);
   const [showStaffConfirm, setShowStaffConfirm] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(REDEEM_TTL_SECONDS);
   const [isExpired, setIsExpired] = useState(false);
 
-  // TTL Countdown
+  // TTL 카운트다운
   useEffect(() => {
     if (isExpired) return;
 
@@ -45,14 +50,14 @@ export function RedeemScreen({
 
   const handleStaffConfirm = useCallback(() => {
     setShowStaffConfirm(false);
-    onComplete(true);
-  }, [onComplete]);
+    handleComplete(true);
+  }, [handleComplete]);
 
   const handleStaffCancel = useCallback(() => {
     setShowStaffConfirm(false);
   }, []);
 
-  // Show expired state
+  // 만료 상태 표시
   if (isExpired) {
     return (
       <div className="h-full flex flex-col p-6 justify-center text-center bg-white">
@@ -65,7 +70,7 @@ export function RedeemScreen({
         <p className="text-kkookk-steel mb-8">
           다시 사용하기를 눌러주세요.
         </p>
-        <Button onClick={() => onComplete(false)} variant="subtle" size="full">
+        <Button onClick={() => handleComplete(false)} variant="subtle" size="full">
           돌아가기
         </Button>
       </div>
@@ -83,12 +88,12 @@ export function RedeemScreen({
             화면을 직원에게 보여주세요
           </p>
 
-          {/* TTL Countdown */}
+          {/* TTL 카운트다운 */}
           <div className="mb-6">
             <TTLCountdown seconds={remainingSeconds} />
           </div>
 
-          {/* Staff Action Button */}
+          {/* 직원 액션 버튼 */}
           <div className="mt-8 pt-6 border-t border-slate-100">
             <Button
               onClick={() => setShowStaffConfirm(true)}
@@ -105,7 +110,7 @@ export function RedeemScreen({
         </div>
       </div>
 
-      {/* Developer Simulation Controls */}
+      {/* 개발자 시뮬레이션 컨트롤 */}
       {showDevControls && (
         <div className="bg-white/90 rounded-2xl p-4 mb-8 backdrop-blur-sm border border-slate-200 shadow-lg">
           <div className="flex items-center justify-center gap-2 mb-3 text-kkookk-steel text-xs font-medium">
@@ -114,7 +119,7 @@ export function RedeemScreen({
           </div>
           <div className="flex gap-3">
             <button
-              onClick={() => onComplete(false)}
+              onClick={() => handleComplete(false)}
               className="w-full py-3 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-bold rounded-xl border border-red-200 transition-colors"
             >
               거절 시나리오 (테스트용)
@@ -123,7 +128,7 @@ export function RedeemScreen({
         </div>
       )}
 
-      {/* Staff Confirmation Modal (2-step confirmation per PRD) */}
+      {/* 직원 확인 모달 (PRD에 따른 2단계 확인) */}
       <StaffConfirmModal
         isOpen={showStaffConfirm}
         onConfirm={handleStaffConfirm}

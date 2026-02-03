@@ -1,6 +1,6 @@
 /**
- * SignupForm Component
- * Registration form for owner accounts with phone verification
+ * SignupForm 컴포넌트
+ * 휴대폰 인증이 포함된 사장님 계정 회원가입 폼
  */
 
 import { useState } from 'react';

@@ -1,9 +1,10 @@
 /**
  * OwnerLoginPage
- * Login page for owner/backoffice authentication
+ * 사장님/백오피스 인증을 위한 로그인 페이지
  */
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { LoginForm } from '../components/LoginForm';
 import { SignupForm } from '../components/SignupForm';
@@ -13,8 +14,8 @@ import type { AuthMode } from '../types';
 interface OwnerLoginPageProps {
   title?: string;
   subtitle?: string;
-  onLoginSuccess: () => void;
-  onBack: () => void;
+  onLoginSuccess?: () => void;
+  onBack?: () => void;
   isTabletMode?: boolean;
 }
 
@@ -25,16 +26,33 @@ export function OwnerLoginPage({
   onBack,
   isTabletMode = false,
 }: OwnerLoginPageProps) {
+  const navigate = useNavigate();
+
+  const handleLoginSuccess = () => {
+    if (onLoginSuccess) {
+      onLoginSuccess();
+    } else {
+      navigate('/owner/stores');
+    }
+  };
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate('/');
+    }
+  };
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [isLoading, setIsLoading] = useState(false);
   const [phone, setPhone] = useState('');
 
   const handleLogin = (_email: string, _password: string) => {
     setIsLoading(true);
-    // Simulate login
+    // 로그인 시뮬레이션
     setTimeout(() => {
       setIsLoading(false);
-      onLoginSuccess();
+      handleLoginSuccess();
     }, 800);
   };
 
@@ -46,7 +64,7 @@ export function OwnerLoginPage({
   }) => {
     setIsLoading(true);
     setPhone(data.phone);
-    // Simulate signup and OTP send
+    // 회원가입 및 OTP 발송 시뮬레이션
     setTimeout(() => {
       setIsLoading(false);
       setAuthMode('verify');
@@ -60,7 +78,7 @@ export function OwnerLoginPage({
       return;
     }
     setIsLoading(true);
-    // Simulate verification
+    // 인증 시뮬레이션
     setTimeout(() => {
       setIsLoading(false);
       alert('휴대폰 인증이 완료되었습니다. 로그인해주세요.');
@@ -112,7 +130,7 @@ export function OwnerLoginPage({
       </div>
 
       <button
-        onClick={onBack}
+        onClick={handleBack}
         className="mt-8 text-kkookk-steel text-sm hover:text-kkookk-navy flex items-center gap-1"
       >
         <ChevronLeft size={16} /> 초기 화면으로

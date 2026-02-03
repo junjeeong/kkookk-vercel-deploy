@@ -1,6 +1,6 @@
 /**
- * RewardCard Component
- * Individual reward card display
+ * RewardCard 컴포넌트
+ * 개별 리워드 카드 표시
  */
 
 import { Coffee } from 'lucide-react';
@@ -23,7 +23,7 @@ export function RewardCard({ reward, onRedeem }: RewardCardProps) {
           : 'hover:scale-[1.02] active:scale-95'
       )}
     >
-      {/* Card Header with Gradient */}
+      {/* 그라디언트 카드 헤더 */}
       <div
         className={cn(
           'bg-gradient-to-r p-6 text-white relative overflow-hidden h-32 flex flex-col justify-between',
@@ -50,7 +50,7 @@ export function RewardCard({ reward, onRedeem }: RewardCardProps) {
         />
       </div>
 
-      {/* Card Footer */}
+      {/* 카드 푸터 */}
       <div className="p-4 bg-white flex justify-between items-center">
         <span
           className={cn(

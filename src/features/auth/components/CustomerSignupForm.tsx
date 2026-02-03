@@ -1,25 +1,18 @@
 /**
- * CustomerSignupForm Component
- * Registration form for new customers with OTP verification
+ * CustomerSignupForm 컴포넌트
+ * OTP 인증을 포함한 신규 고객 회원가입 폼
  */
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Sparkles, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
 type SignupStep = 'input' | 'otp' | 'success';
 
-interface CustomerSignupFormProps {
-  onComplete: () => void;
-  onBack: () => void;
-  _storeName?: string;
-}
-
-export function CustomerSignupForm({
-  onComplete,
-  onBack,
-}: CustomerSignupFormProps) {
+export function CustomerSignupForm() {
+  const navigate = useNavigate();
   const [step, setStep] = useState<SignupStep>('input');
   const [name, setName] = useState('');
   const [nickname, setNickname] = useState('');
@@ -32,7 +25,7 @@ export function CustomerSignupForm({
       alert('모든 정보를 입력해주세요.');
       return;
     }
-    // Simulate OTP request
+    // OTP 요청 시뮬레이션
     setStep('otp');
   };
 
@@ -42,7 +35,7 @@ export function CustomerSignupForm({
       alert('인증번호를 입력해주세요.');
       return;
     }
-    // Simulate verification
+    // 인증 시뮬레이션
     setStep('success');
   };
 
@@ -67,7 +60,7 @@ export function CustomerSignupForm({
 
         <div className="w-full pb-8 animate-in fade-in slide-in-from-bottom-4 delay-300">
           <Button
-            onClick={onComplete}
+            onClick={() => navigate('/customer/wallet')}
             variant="primary"
             size="full"
             className="shadow-lg shadow-orange-200"
@@ -84,7 +77,7 @@ export function CustomerSignupForm({
     <div className="h-full p-6 pt-12 flex flex-col bg-white">
       <div className="flex items-center mb-6 -ml-2">
         <button
-          onClick={() => (step === 'otp' ? setStep('input') : onBack())}
+          onClick={() => (step === 'otp' ? setStep('input') : navigate('/customer'))}
           className="p-2 text-kkookk-steel"
           aria-label="뒤로 가기"
         >

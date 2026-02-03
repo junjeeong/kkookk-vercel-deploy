@@ -1,6 +1,6 @@
 /**
- * Mock Data Constants for KKOOKK Development
- * These will be replaced with API calls in production
+ * KKOOKK 개발용 목 데이터 상수
+ * 프로덕션에서는 API 호출로 대체됨
  */
 
 import type {
@@ -14,7 +14,7 @@ import type {
 } from '@/types/domain';
 
 // =============================================================================
-// Initial Stamp Card
+// 초기 스탬프 카드
 // =============================================================================
 
 export const INITIAL_STAMP_CARD: StampCard = {
@@ -28,7 +28,7 @@ export const INITIAL_STAMP_CARD: StampCard = {
 };
 
 // =============================================================================
-// Mock Cards for Customer Wallet
+// 고객 지갑용 목 카드
 // =============================================================================
 
 export const MOCK_OTHER_CARDS: StampCard[] = [
@@ -57,7 +57,7 @@ export const MOCK_OTHER_CARDS: StampCard[] = [
 ];
 
 // =============================================================================
-// Mock Rewards
+// 목 리워드
 // =============================================================================
 
 export const MOCK_REWARDS: Reward[] = [
@@ -82,7 +82,7 @@ export const MOCK_REWARDS: Reward[] = [
 ];
 
 // =============================================================================
-// Mock Issuance Requests
+// 목 적립 요청
 // =============================================================================
 
 export const MOCK_REQUESTS: IssuanceRequest[] = [
@@ -139,7 +139,7 @@ export const MOCK_REQUESTS: IssuanceRequest[] = [
 ];
 
 // =============================================================================
-// Mock Migration Requests
+// 목 마이그레이션 요청
 // =============================================================================
 
 export const MOCK_MIGRATIONS: MigrationRequest[] = [
@@ -148,26 +148,26 @@ export const MOCK_MIGRATIONS: MigrationRequest[] = [
     storeName: '블루보틀 성수',
     count: 5,
     status: 'pending',
-    date: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+    date: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2시간 전
   },
   {
     id: 'mig_002',
     storeName: '스타벅스 역삼',
     count: 8,
     status: 'approved',
-    date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), // 3 days ago
+    date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), // 3일 전
   },
   {
     id: 'mig_003',
     storeName: '블루보틀 성수',
     count: 12,
     status: 'rejected',
-    date: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+    date: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1일 전
   },
 ];
 
 // =============================================================================
-// Mock Store Statistics
+// 목 매장 통계
 // =============================================================================
 
 export const MOCK_STATS: StoreStats = {
@@ -188,7 +188,7 @@ export const MOCK_STATS: StoreStats = {
 };
 
 // =============================================================================
-// Mock Stores (Owner Backoffice)
+// 목 매장 (사장님 백오피스)
 // =============================================================================
 
 export const MOCK_STORES: Store[] = [
@@ -209,7 +209,7 @@ export const MOCK_STORES: Store[] = [
 ];
 
 // =============================================================================
-// Mock Admin Cards (for Store Detail)
+// 목 관리자 카드 (매장 상세용)
 // =============================================================================
 
 export const MOCK_ADMIN_CARDS: AdminStampCard[] = [
@@ -230,7 +230,7 @@ export const MOCK_ADMIN_CARDS: AdminStampCard[] = [
 ];
 
 // =============================================================================
-// Store Categories
+// 매장 카테고리
 // =============================================================================
 
 export const STORE_CATEGORIES = [

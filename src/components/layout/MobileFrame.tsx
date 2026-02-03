@@ -1,7 +1,7 @@
 /**
- * MobileFrame Component
- * Full-screen web app container for the customer PWA
- * Includes slide-out menu
+ * MobileFrame 컴포넌트
+ * 고객 PWA를 위한 풀스크린 웹앱 컨테이너
+ * 슬라이드 아웃 메뉴 포함
  */
 
 import type { ReactNode } from 'react';
@@ -43,15 +43,15 @@ export function MobileFrame({
           className
         )}
       >
-        {/* Main Content Area - takes full height */}
-        <div className="flex-1 flex flex-col no-scrollbar">
+        {/* 메인 콘텐츠 영역 - 전체 높이 사용 */}
+        <main className="flex-1 flex flex-col no-scrollbar bg-white">
           {children}
-        </div>
+        </main>
 
-        {/* Slide-out Menu */}
+        {/* 슬라이드 아웃 메뉴 */}
         {isMenuOpen && (
           <div className="fixed inset-0 z-50 flex justify-end">
-            {/* Backdrop */}
+            {/* 배경 오버레이 */}
             <div
               role="button"
               tabIndex={0}
@@ -65,9 +65,9 @@ export function MobileFrame({
                 }
               }}
             />
-            {/* Menu Panel */}
+            {/* 메뉴 패널 */}
             <div className="relative w-[300px] max-w-[80vw] h-full bg-white shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
-              {/* Menu Header */}
+              {/* 메뉴 헤더 */}
               <div className="p-6 pt-12 flex justify-between items-center border-b border-slate-100">
                 <span className="font-bold text-lg text-kkookk-navy">전체 메뉴</span>
                 <button
@@ -79,15 +79,15 @@ export function MobileFrame({
                 </button>
               </div>
 
-              {/* Menu Content */}
+              {/* 메뉴 콘텐츠 */}
               <div className="flex-1 overflow-y-auto no-scrollbar py-2">
-                {/* User Info */}
+                {/* 사용자 정보 */}
                 <div className="px-6 py-4 mb-2">
                   <p className="text-xs text-kkookk-steel mb-1">현재 계정</p>
                   <p className="font-bold text-lg text-kkookk-navy">{userName}</p>
                 </div>
 
-                {/* Menu Links */}
+                {/* 메뉴 링크들 */}
                 <MenuLink
                   icon={<History size={20} />}
                   label="스탬프/리워드 이력"
@@ -110,7 +110,7 @@ export function MobileFrame({
                 />
               </div>
 
-              {/* Menu Footer */}
+              {/* 메뉴 푸터 */}
               <div className="p-6 border-t border-slate-100 bg-kkookk-sand/30">
                 <button
                   onClick={onLogout}

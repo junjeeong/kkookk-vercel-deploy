@@ -1,33 +1,37 @@
 /**
- * CardDetailView Component
- * Detailed view of a stamp card with progress and actions
+ * CardDetailView 컴포넌트
+ * 진행 상황 및 액션이 포함된 스탬프 카드 상세 뷰
  */
 
+import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, Check, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { MOCK_OTHER_CARDS, INITIAL_STAMP_CARD } from '@/lib/constants/mockData';
 import type { StampCard } from '@/types/domain';
 
-interface CardDetailViewProps {
-  card: StampCard;
-  onBack: () => void;
-  onRequestStamp: () => void;
-  onViewRewards: () => void;
-}
+export function CardDetailView() {
+  const navigate = useNavigate();
+  const { cardId } = useParams<{ cardId: string }>();
 
-export function CardDetailView({
-  card,
-  onBack,
-  onRequestStamp,
-  onViewRewards,
-}: CardDetailViewProps) {
+  // Mock cards - 나중에 API로 대체
+  const allCards: StampCard[] = [
+    {
+      ...INITIAL_STAMP_CARD,
+      bgGradient: 'from-[var(--color-kkookk-orange-500)] to-[#E04F00]',
+      shadowColor: 'shadow-orange-200',
+    },
+    ...MOCK_OTHER_CARDS,
+  ];
+
+  const card = allCards.find((c) => c.id === cardId) || allCards[0];
   const isComplete = card.current >= card.max;
 
   return (
     <div className="h-full bg-white flex flex-col pt-12">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-100 flex items-center">
+      {/* 헤더 */}
+      <div className="px-6 py-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center">
         <button
-          onClick={onBack}
+          onClick={() => navigate('/customer/wallet')}
           className="p-2 -ml-2 text-kkookk-steel"
           aria-label="뒤로 가기"
         >
@@ -38,9 +42,9 @@ export function CardDetailView({
         </h1>
       </div>
 
-      {/* Content */}
+      {/* 콘텐츠 */}
       <div className="flex-1 overflow-y-auto no-scrollbar p-6 pb-32">
-        {/* Reward Info */}
+        {/* 리워드 정보 */}
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold mb-1 text-kkookk-navy">
             {card.reward}
@@ -50,7 +54,7 @@ export function CardDetailView({
           </p>
         </div>
 
-        {/* Progress Grid */}
+        {/* 진행 상황 그리드 */}
         <div className="grid grid-cols-5 gap-3 mb-8">
           {Array.from({ length: card.max }).map((_, i) => {
             const isActive = i < card.current;
@@ -69,7 +73,7 @@ export function CardDetailView({
           })}
         </div>
 
-        {/* Info Box */}
+        {/* 안내 박스 */}
         <div className="bg-kkookk-sand p-4 rounded-xl text-xs text-kkookk-steel leading-relaxed">
           <p>• 스탬프 유효기간은 적립일로부터 6개월입니다.</p>
           <p>• 1일 최대 5개까지 적립 가능합니다.</p>
@@ -77,11 +81,11 @@ export function CardDetailView({
         </div>
       </div>
 
-      {/* Bottom Action */}
+      {/* 하단 액션 */}
       <div className="absolute bottom-0 left-0 w-full bg-white border-t border-slate-100 p-4 pb-8 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         {isComplete ? (
           <Button
-            onClick={onViewRewards}
+            onClick={() => navigate('/customer/redeems')}
             variant="navy"
             size="full"
           >
@@ -89,7 +93,7 @@ export function CardDetailView({
           </Button>
         ) : (
           <Button
-            onClick={onRequestStamp}
+            onClick={() => navigate(`/customer/wallet/${cardId}/stamp`)}
             variant="primary"
             size="full"
             className="shadow-lg shadow-orange-200"

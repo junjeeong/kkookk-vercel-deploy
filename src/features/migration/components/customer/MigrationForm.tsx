@@ -1,31 +1,30 @@
 /**
- * MigrationForm Component
- * Form for customers to submit paper stamp migration requests
+ * MigrationForm 컴포넌트
+ * 고객이 종이 스탬프 전환 요청을 제출하기 위한 폼
  */
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronDown, Camera, Check, Info, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { MOCK_OTHER_CARDS, INITIAL_STAMP_CARD, MOCK_MIGRATIONS } from '@/lib/constants/mockData';
 import type { StampCard, MigrationRequest } from '@/types/domain';
 
 interface MigrationFormProps {
-  cards: StampCard[];
-  existingMigrations: MigrationRequest[];
-  onBack: () => void;
-  onSubmit: (storeName: string, count: number, file: File) => void;
+  cards?: StampCard[];
+  existingMigrations?: MigrationRequest[];
 }
 
 export function MigrationForm({
-  cards,
-  existingMigrations,
-  onBack,
-  onSubmit,
+  cards = [INITIAL_STAMP_CARD, ...MOCK_OTHER_CARDS],
+  existingMigrations = MOCK_MIGRATIONS,
 }: MigrationFormProps) {
+  const navigate = useNavigate();
   const [count, setCount] = useState('');
   const [file, setFile] = useState<File | null>(null);
 
-  // Check which stores can still receive migration requests
+  // 아직 전환 요청을 받을 수 있는 매장 확인
   const availableStores = cards.map((card) => {
     const isAlreadyApproved = existingMigrations.some(
       (m) => m.storeName === card.storeName && m.status === 'approved'
@@ -73,15 +72,17 @@ export function MigrationForm({
       return;
     }
 
-    onSubmit(selectedStoreName, parseInt(count), file);
+    // TODO: API 연동 후 실제 제출 처리
+    console.log('Migration submitted:', selectedStoreName, parseInt(count), file);
+    navigate('/customer/migrations');
   };
 
   return (
     <div className="h-full bg-white flex flex-col pt-12">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-100 flex items-center sticky top-0 bg-white z-10 -mt-12 pt-12">
+      {/* 헤더 */}
+      <div className="px-6 py-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center sticky top-0 bg-white z-10 -mt-12 pt-12">
         <button
-          onClick={onBack}
+          onClick={() => navigate('/customer/migrations')}
           className="p-2 -ml-2 text-kkookk-steel hover:text-kkookk-navy"
           aria-label="뒤로 가기"
         >
@@ -90,9 +91,9 @@ export function MigrationForm({
         <h1 className="font-bold text-lg ml-2 text-kkookk-navy">전환 신청하기</h1>
       </div>
 
-      {/* Form Content */}
+      {/* 폼 콘텐츠 */}
       <form onSubmit={handleSubmit} className="p-6 flex-1 overflow-y-auto">
-        {/* Info Banner */}
+        {/* 안내 배너 */}
         <div className="bg-blue-50 p-4 rounded-xl flex gap-3 mb-8 text-blue-800 text-xs leading-relaxed">
           <Info size={20} className="shrink-0" />
           <div>
@@ -103,7 +104,7 @@ export function MigrationForm({
         </div>
 
         <div className="space-y-6">
-          {/* Store Selection */}
+          {/* 매장 선택 */}
           <div>
             <label
               htmlFor="store-select"
@@ -144,7 +145,7 @@ export function MigrationForm({
             )}
           </div>
 
-          {/* Stamp Count */}
+          {/* 스탬프 개수 */}
           <Input
             type="number"
             label="보유 스탬프 개수"
@@ -154,7 +155,7 @@ export function MigrationForm({
             min={1}
           />
 
-          {/* Photo Upload */}
+          {/* 사진 업로드 */}
           <div>
             <label
               htmlFor="photo-upload"
@@ -190,7 +191,7 @@ export function MigrationForm({
         </div>
       </form>
 
-      {/* Submit Button */}
+      {/* 제출 버튼 */}
       <div className="p-6 border-t border-slate-100">
         <Button
           onClick={handleSubmit}

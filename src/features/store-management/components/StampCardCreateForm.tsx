@@ -1,7 +1,7 @@
 /**
- * StampCardCreateForm Component
- * 3-step wizard for creating new stamp cards
- * Based on original mock/ui.old.js implementation
+ * StampCardCreateForm 컴포넌트
+ * 새 스탬프 카드 생성을 위한 3단계 마법사
+ * 기존 mock/ui.old.js 구현을 기반으로 함
  */
 
 import { useState } from 'react';
@@ -25,7 +25,7 @@ const INITIAL_DESIGN: StampCardDesign = {
   textColor: 'black',
 };
 
-const COLOR_OPTIONS = ['orange', 'blue', 'emerald', 'rose', 'violet'] as const;
+const COLOR_OPTIONS = ['orange', 'green', 'blue', 'purple', 'navy'] as const;
 
 export function StampCardCreateForm({
   storeName,
@@ -78,7 +78,7 @@ export function StampCardCreateForm({
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel - Form */}
+        {/* 왼쪽 패널 - 폼 */}
         <div className="w-[400px] bg-white border-r border-slate-200 p-8 overflow-y-auto">
           <div className="mb-6 flex items-center gap-2">
             <button
@@ -89,7 +89,7 @@ export function StampCardCreateForm({
             </button>
           </div>
 
-          {/* Step 1: Template Selection */}
+          {/* 1단계: 템플릿 선택 */}
           {step === 1 && (
             <div className="space-y-6">
               <h3 className="font-bold text-lg text-kkookk-navy">템플릿 선택</h3>
@@ -139,7 +139,7 @@ export function StampCardCreateForm({
             </div>
           )}
 
-          {/* Step 2: Design Customization */}
+          {/* 2단계: 디자인 커스터마이징 */}
           {step === 2 && (
             <div className="space-y-8">
               <div>
@@ -310,7 +310,7 @@ export function StampCardCreateForm({
             </div>
           )}
 
-          {/* Step 3: Stamp Count & Reward */}
+          {/* 3단계: 스탬프 수 및 보상 */}
           {step === 3 && (
             <div className="space-y-8">
               <div>
@@ -367,7 +367,7 @@ export function StampCardCreateForm({
           )}
         </div>
 
-        {/* Right Panel - Preview */}
+        {/* 오른쪽 패널 - 미리보기 */}
         <div className="flex-1 bg-kkookk-sand flex flex-col items-center justify-center p-8 relative">
           <div className="w-[320px] bg-white rounded-[32px] shadow-2xl border-4 border-kkookk-navy overflow-hidden h-[600px] flex flex-col">
             <div className="h-full flex flex-col overflow-y-auto">
@@ -376,7 +376,7 @@ export function StampCardCreateForm({
                   {design.cardName}
                 </h2>
 
-                {/* Card Preview */}
+                {/* 카드 미리보기 */}
                 <div
                   className={`rounded-2xl p-5 mb-6 shadow-lg relative overflow-hidden transition-all duration-300 ${
                     design.template === 'basic'
@@ -451,7 +451,7 @@ export function StampCardCreateForm({
                   </div>
                 </div>
 
-                {/* Stamp Board Preview */}
+                {/* 스탬프 보드 미리보기 */}
                 <h3 className="text-sm font-bold text-kkookk-steel mb-2">
                   스탬프 보드
                 </h3>
@@ -504,7 +504,7 @@ export function StampCardCreateForm({
         </div>
       </div>
 
-      {/* Bottom Navigation */}
+      {/* 하단 네비게이션 */}
       <div className="p-4 bg-white border-t border-slate-200 flex justify-between">
         <button
           type="button"

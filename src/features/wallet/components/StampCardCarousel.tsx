@@ -1,6 +1,6 @@
 /**
- * StampCardCarousel Component
- * Horizontal scrolling carousel for stamp cards
+ * StampCardCarousel 컴포넌트
+ * 스탬프 카드용 가로 스크롤 캐러셀
  */
 
 import { useState, useRef, useCallback } from 'react';
@@ -36,7 +36,7 @@ export function StampCardCarousel({
 
   return (
     <div className={cn('flex flex-col', className)}>
-      {/* Carousel */}
+      {/* 캐러셀 */}
       <div
         ref={scrollRef}
         className="flex overflow-x-auto snap-x snap-mandatory px-[7.5%] gap-4 no-scrollbar items-center py-6"
@@ -60,7 +60,7 @@ export function StampCardCarousel({
         ))}
       </div>
 
-      {/* Pagination Dots */}
+      {/* 페이지네이션 점 */}
       <div className="flex justify-center gap-2 mt-6">
         {cards.map((_, i) => (
           <div

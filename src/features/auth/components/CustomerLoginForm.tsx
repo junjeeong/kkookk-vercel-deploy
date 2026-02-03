@@ -1,24 +1,22 @@
 /**
- * CustomerLoginForm Component
- * Simple name + phone login for returning customers
+ * CustomerLoginForm 컴포넌트
+ * 기존 고객을 위한 이름 + 휴대폰 번호 간편 로그인 폼
  */
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
 interface CustomerLoginFormProps {
-  onSubmit: (name: string, phone: string) => void;
-  onBack: () => void;
   isLoading?: boolean;
 }
 
 export function CustomerLoginForm({
-  onSubmit,
-  onBack,
   isLoading = false,
 }: CustomerLoginFormProps) {
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
 
@@ -28,14 +26,15 @@ export function CustomerLoginForm({
       alert('이름과 휴대폰 번호를 입력해주세요.');
       return;
     }
-    onSubmit(name, phone);
+    // TODO: API 연동 후 실제 로그인 처리
+    navigate('/customer/wallet');
   };
 
   return (
     <div className="h-full p-6 pt-12 flex flex-col bg-white">
       <div className="flex items-center mb-6 -ml-2">
         <button
-          onClick={onBack}
+          onClick={() => navigate('/customer')}
           className="p-2 text-kkookk-steel"
           aria-label="뒤로 가기"
         >

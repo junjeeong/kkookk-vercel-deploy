@@ -1,6 +1,6 @@
 /**
- * TerminalSidebar Component
- * Side navigation for terminal dashboard
+ * TerminalSidebar 컴포넌트
+ * 터미널 대시보드용 사이드 네비게이션
  */
 
 import { Bell, History, Settings, LogOut } from 'lucide-react';
@@ -33,7 +33,7 @@ export function TerminalSidebar({
 
   return (
     <div className="w-64 bg-white border-r border-slate-200 flex flex-col">
-      {/* Store Info */}
+      {/* 매장 정보 */}
       <div className="p-6 border-b border-slate-100">
         <h1 className="font-bold text-xl text-kkookk-navy">{storeName}</h1>
         <div
@@ -54,7 +54,7 @@ export function TerminalSidebar({
         </div>
       </div>
 
-      {/* Navigation */}
+      {/* 네비게이션 */}
       <nav className="flex-1 p-4 space-y-2">
         {tabs.map((tab) => (
           <button
@@ -78,7 +78,7 @@ export function TerminalSidebar({
         ))}
       </nav>
 
-      {/* Logout */}
+      {/* 로그아웃 */}
       <div className="p-4">
         <button
           onClick={onLogout}

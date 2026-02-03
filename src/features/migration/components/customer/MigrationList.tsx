@@ -1,24 +1,23 @@
 /**
- * MigrationList Component
- * Customer view of migration request history
+ * MigrationList 컴포넌트
+ * 고객의 전환 요청 내역 뷰
  */
 
+import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { formatShortDate } from '@/lib/utils/format';
+import { MOCK_MIGRATIONS } from '@/lib/constants/mockData';
 import type { MigrationRequest } from '@/types/domain';
 
 interface MigrationListProps {
-  migrations: MigrationRequest[];
-  onBack: () => void;
-  onNewRequest: () => void;
+  migrations?: MigrationRequest[];
 }
 
 export function MigrationList({
-  migrations,
-  onBack,
-  onNewRequest,
+  migrations = MOCK_MIGRATIONS,
 }: MigrationListProps) {
+  const navigate = useNavigate();
   const getStatusBadge = (status: MigrationRequest['status']) => {
     switch (status) {
       case 'pending':
@@ -33,12 +32,12 @@ export function MigrationList({
   };
 
   return (
-    <div className="h-full bg-kkookk-sand flex flex-col pt-12">
-      {/* Header */}
-      <div className="px-6 py-4 bg-white border-b border-slate-100 flex items-center justify-between sticky top-0 z-10 -mt-12 pt-12">
+    <div className="h-full flex flex-col pt-12">
+      {/* 헤더 */}
+      <div className="px-6 py-4 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center justify-between sticky top-0 z-10 -mt-12 pt-12">
         <div className="flex items-center">
           <button
-            onClick={onBack}
+            onClick={() => navigate('/customer/wallet')}
             className="p-2 -ml-2 text-kkookk-steel hover:text-kkookk-navy"
             aria-label="뒤로 가기"
           >
@@ -49,7 +48,7 @@ export function MigrationList({
           </h1>
         </div>
         <button
-          onClick={onNewRequest}
+          onClick={() => navigate('/customer/migrations/new')}
           className="w-8 h-8 bg-kkookk-navy text-white rounded-lg flex items-center justify-center hover:bg-slate-800"
           aria-label="새 신청"
         >
@@ -57,7 +56,7 @@ export function MigrationList({
         </button>
       </div>
 
-      {/* List */}
+      {/* 목록 */}
       <div className="p-6 space-y-4 overflow-y-auto">
         {migrations.length === 0 ? (
           <div className="text-center text-kkookk-steel mt-20">

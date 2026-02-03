@@ -1,6 +1,6 @@
 /**
- * StampCardItem Component
- * Individual stamp card display in the wallet carousel
+ * StampCardItem 컴포넌트
+ * 지갑 캐러셀에서 개별 스탬프 카드 표시
  */
 
 import { Coffee, ChevronRight } from 'lucide-react';
@@ -40,7 +40,7 @@ export function StampCardItem({
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onClick?.()}
     >
-      {/* Header */}
+      {/* 헤더 */}
       <div className="flex justify-between items-start z-10">
         <span className="font-bold text-lg opacity-90 text-white drop-shadow-md tracking-tight">
           {card.storeName}
@@ -50,13 +50,13 @@ export function StampCardItem({
         </span>
       </div>
 
-      {/* Background Icon */}
+      {/* 배경 아이콘 */}
       <Coffee
         className="absolute -right-2 -bottom-4 text-white/10 w-32 h-32 transform rotate-12"
         strokeWidth={1}
       />
 
-      {/* Footer */}
+      {/* 푸터 */}
       <div className="flex justify-between items-end z-10">
         <div>
           <p className="text-white/80 text-[10px] font-medium mb-0.5 ml-0.5">

@@ -1,7 +1,7 @@
 /**
- * StampCardStats Component
- * Full-page statistics view for stamp cards
- * Based on original mock/ui.old.js implementation
+ * StampCardStats 컴포넌트
+ * 스탬프 카드 전체 페이지 통계 뷰
+ * 원본 mock/ui.old.js 구현 기반
  */
 
 import {
@@ -76,7 +76,7 @@ const STATS_CARDS = [
 export function StampCardStats({ cardName, onBack }: StampCardStatsProps) {
   return (
     <div className="p-8 max-w-6xl mx-auto w-full h-full flex flex-col">
-      {/* Header */}
+      {/* 헤더 */}
       <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
@@ -104,7 +104,7 @@ export function StampCardStats({ cardName, onBack }: StampCardStatsProps) {
         </div>
       </div>
 
-      {/* KPI Cards */}
+      {/* KPI 카드 */}
       <div className="grid grid-cols-4 gap-4 mb-8">
         {STATS_CARDS.map((stat, i) => (
           <div
@@ -130,9 +130,9 @@ export function StampCardStats({ cardName, onBack }: StampCardStatsProps) {
         ))}
       </div>
 
-      {/* Charts Section */}
+      {/* 차트 섹션 */}
       <div className="grid grid-cols-3 gap-6 flex-1 min-h-0">
-        {/* Weekly Chart */}
+        {/* 주간 차트 */}
         <div className="col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
           <div className="flex justify-between items-center mb-6">
             <h4 className="font-bold text-lg text-kkookk-navy">주간 적립 추이</h4>
@@ -155,16 +155,16 @@ export function StampCardStats({ cardName, onBack }: StampCardStatsProps) {
                 className="flex-1 flex flex-col items-center gap-2 h-full justify-end group cursor-pointer"
               >
                 <div className="relative w-full flex justify-center h-full items-end">
-                  {/* Tooltip */}
+                  {/* 툴팁 */}
                   <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-kkookk-navy text-white text-xs px-2 py-1 rounded pointer-events-none mb-2 z-10 whitespace-nowrap font-bold">
                     {d.val}건 적립
                   </div>
-                  {/* Previous Week Bar */}
+                  {/* 지난주 막대 */}
                   <div
                     className="w-3 bg-slate-200 rounded-t-full absolute bottom-0 opacity-0 group-hover:opacity-50 transition-all duration-500"
                     style={{ height: `${d.prev}%` }}
                   />
-                  {/* Current Week Bar */}
+                  {/* 이번주 막대 */}
                   <div
                     className="w-3 bg-kkookk-orange-500 rounded-t-full relative z-10 transition-all duration-500 hover:bg-orange-600"
                     style={{ height: `${d.val}%` }}
@@ -178,9 +178,9 @@ export function StampCardStats({ cardName, onBack }: StampCardStatsProps) {
           </div>
         </div>
 
-        {/* Time Distribution & Insight */}
+        {/* 시간대 분포 및 인사이트 */}
         <div className="col-span-1 flex flex-col gap-6">
-          {/* Time Distribution */}
+          {/* 시간대 분포 */}
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex-1">
             <h4 className="font-bold text-lg text-kkookk-navy mb-4">
               주요 방문 시간대
@@ -214,7 +214,7 @@ export function StampCardStats({ cardName, onBack }: StampCardStatsProps) {
             </div>
           </div>
 
-          {/* AI Insight */}
+          {/* AI 인사이트 */}
           <div className="bg-slate-800 p-6 rounded-2xl shadow-sm text-white">
             <div className="flex items-start gap-3">
               <Sparkles className="text-yellow-400 shrink-0" size={20} />

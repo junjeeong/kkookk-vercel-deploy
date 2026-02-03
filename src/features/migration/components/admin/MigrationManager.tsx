@@ -1,6 +1,6 @@
 /**
- * MigrationManager Component
- * Admin view for managing migration requests
+ * MigrationManager 컴포넌트
+ * 마이그레이션 요청 관리 어드민 뷰
  */
 
 import { useState } from 'react';
@@ -125,20 +125,20 @@ export function MigrationManager({
         </table>
       </div>
 
-      {/* Image Preview Modal */}
+      {/* 이미지 미리보기 모달 */}
       {viewImage && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-kkookk-navy/80 backdrop-blur-sm"
           role="presentation"
         >
-          {/* Backdrop button */}
+          {/* 배경 버튼 */}
           <button
             type="button"
             aria-label="이미지 미리보기 닫기"
             className="absolute inset-0 w-full h-full cursor-default"
             onClick={() => setViewImage(null)}
           />
-          {/* Dialog panel */}
+          {/* 다이얼로그 패널 */}
           <div
             role="dialog"
             aria-label="이미지 미리보기"

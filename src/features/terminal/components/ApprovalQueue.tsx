@@ -1,6 +1,6 @@
 /**
- * ApprovalQueue Component
- * Real-time queue of pending requests for terminal approval
+ * ApprovalQueue 컴포넌트
+ * 터미널 승인용 실시간 대기 요청 큐
  */
 
 import { Loader2 } from 'lucide-react';

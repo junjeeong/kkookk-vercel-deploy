@@ -1,6 +1,6 @@
 /**
- * StoreStatusToggle Component
- * Toggle for store open/closed status
+ * StoreStatusToggle 컴포넌트
+ * 매장 영업/마감 상태 토글
  */
 
 import { Store, Power } from 'lucide-react';
@@ -24,7 +24,7 @@ export function StoreStatusToggle({
         <h2 className="text-2xl font-bold text-kkookk-navy">매장 설정</h2>
       </div>
       <div className="p-6">
-        {/* Store Status */}
+        {/* 매장 상태 */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 flex justify-between items-center shadow-sm">
           <div>
             <h3 className="font-bold text-lg text-kkookk-navy flex items-center gap-2">
@@ -52,7 +52,7 @@ export function StoreStatusToggle({
           </button>
         </div>
 
-        {/* Auto Approve (Disabled/Coming Soon) */}
+        {/* 자동 승인 (비활성화/준비중) */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 mt-4 flex justify-between items-center shadow-sm opacity-50 cursor-not-allowed">
           <div>
             <h3 className="font-bold text-lg text-kkookk-navy flex items-center gap-2">

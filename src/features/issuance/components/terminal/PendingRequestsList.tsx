@@ -1,6 +1,6 @@
 /**
- * PendingRequestsList Component
- * List of pending stamp requests for terminal approval
+ * PendingRequestsList 컴포넌트
+ * 터미널 승인 대기 중인 스탬프 요청 목록
  */
 
 import { Bell } from 'lucide-react';

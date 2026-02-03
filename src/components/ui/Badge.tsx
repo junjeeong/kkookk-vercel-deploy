@@ -1,6 +1,6 @@
 /**
- * Badge Component
- * Status badges and labels following KKOOKK design system
+ * Badge 컴포넌트
+ * KKOOKK 디자인 시스템을 따르는 상태 배지 및 라벨
  */
 
 import { cva, type VariantProps } from 'class-variance-authority';

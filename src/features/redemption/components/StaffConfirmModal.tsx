@@ -1,7 +1,7 @@
 /**
- * StaffConfirmModal Component
- * 2-step confirmation modal for redeem (PRD security requirement)
- * Staff must confirm on customer's phone to complete redemption
+ * StaffConfirmModal 컴포넌트
+ * 리딤 2단계 확인 모달 (PRD 보안 요구사항)
+ * 직원이 고객 휴대폰에서 확인해야 리딤 완료
  */
 
 import { AlertCircle } from 'lucide-react';

@@ -1,6 +1,6 @@
 /**
- * RedeemResultView Component
- * Result view after redemption is processed
+ * RedeemResultView 컴포넌트
+ * 리딤 처리 후 결과 화면
  */
 
 import { Check, AlertCircle } from 'lucide-react';
