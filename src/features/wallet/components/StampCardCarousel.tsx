@@ -1,0 +1,81 @@
+/**
+ * StampCardCarousel Component
+ * Horizontal scrolling carousel for stamp cards
+ */
+
+import { useState, useRef, useCallback } from 'react';
+import { cn } from '@/lib/utils';
+import { StampCardItem } from './StampCardItem';
+import type { StampCard } from '@/types/domain';
+
+interface StampCardCarouselProps {
+  cards: StampCard[];
+  onCardSelect: (card: StampCard) => void;
+  className?: string;
+}
+
+export function StampCardCarousel({
+  cards,
+  onCardSelect,
+  className,
+}: StampCardCarouselProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const target = e.target as HTMLDivElement;
+      const scrollLeft = target.scrollLeft;
+      const width = target.offsetWidth;
+      const cardWidth = width * 0.85;
+      const index = Math.round(scrollLeft / cardWidth);
+      setCurrentIndex(Math.min(Math.max(index, 0), cards.length - 1));
+    },
+    [cards.length]
+  );
+
+  return (
+    <div className={cn('flex flex-col', className)}>
+      {/* Carousel */}
+      <div
+        ref={scrollRef}
+        className="flex overflow-x-auto snap-x snap-mandatory px-[7.5%] gap-4 no-scrollbar items-center py-6"
+        onScroll={handleScroll}
+      >
+        {cards.map((card, index) => (
+          <div
+            key={card.id}
+            className="snap-center shrink-0 w-[85%] transition-all duration-300"
+            style={{
+              transform: currentIndex === index ? 'scale(1)' : 'scale(0.95)',
+              opacity: currentIndex === index ? 1 : 0.7,
+            }}
+          >
+            <StampCardItem
+              card={card}
+              isActive={currentIndex === index}
+              onClick={() => onCardSelect(card)}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Pagination Dots */}
+      <div className="flex justify-center gap-2 mt-6">
+        {cards.map((_, i) => (
+          <div
+            key={i}
+            className={cn(
+              'h-1.5 rounded-full transition-all duration-300',
+              i === currentIndex
+                ? 'bg-kkookk-navy w-4'
+                : 'bg-slate-300 w-1.5'
+            )}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default StampCardCarousel;
