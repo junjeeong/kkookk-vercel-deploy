@@ -64,20 +64,20 @@ export const MOCK_REWARDS: Reward[] = [
   {
     id: "reward_001",
     storeName: "블루보틀 성수",
+    stampCardTitle: "블루보틀 스탬프 카드",
     name: "아메리카노 1잔",
     expiry: "2023.12.31",
     isUsed: false,
-    theme: "orange",
-    gradient: "from-[var(--color-kkookk-orange-500)] to-[#E04F00]",
+    designJson: null,
   },
   {
     id: "reward_002",
     storeName: "스타벅스 역삼",
+    stampCardTitle: "스타벅스 스탬프 카드",
     name: "1,000원 할인",
     expiry: "2023.10.01",
     isUsed: true,
-    theme: "gray",
-    gradient: "from-slate-600 to-slate-800",
+    designJson: null,
   },
 ];
 

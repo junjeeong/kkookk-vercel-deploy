@@ -4,7 +4,7 @@
  */
 
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, MapPin, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { ChevronLeft, MapPin, Loader2, AlertCircle } from 'lucide-react';
 import { MigrationManager } from '@/features/migration/components/admin';
 import { useStore } from '@/features/store-management/hooks/useStore';
 import {

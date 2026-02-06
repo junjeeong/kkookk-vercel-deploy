@@ -172,7 +172,7 @@ export interface RedeemSession {
 // =============================================================================
 
 export type TemplateType = 'basic' | 'premium' | 'custom';
-export type ColorTheme = 'orange' | 'green' | 'blue' | 'purple' | 'navy';
+export type ColorTheme = 'orange' | 'indigo' | 'emerald' | 'purple' | 'rose';
 export type TextColorOption = 'black' | 'white';
 
 export interface StampCardDesign {

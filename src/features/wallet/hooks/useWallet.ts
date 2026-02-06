@@ -159,8 +159,8 @@ export function useWalletRewardsInfinite(
       }),
     getNextPageParam: (lastPage) => {
       const { pageInfo } = lastPage;
-      if (pageInfo.pageNumber < pageInfo.totalPages - 1) {
-        return pageInfo.pageNumber + 1;
+      if (pageInfo.number < pageInfo.totalPages - 1) {
+        return pageInfo.number + 1;
       }
       return undefined;
     },

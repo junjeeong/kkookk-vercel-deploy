@@ -172,15 +172,15 @@ export interface WalletRewardListResponse {
   pageInfo: PageInfo;
 }
 
-export type RedeemEventType = 'REQUESTED' | 'COMPLETED';
-export type RedeemEventResult = 'SUCCESS' | 'FAILED';
+export type CustomerRedeemEventType = 'REQUESTED' | 'COMPLETED';
+export type CustomerRedeemEventResult = 'SUCCESS' | 'FAILED';
 
 export interface RedeemHistoryItem {
   id: number;
   redeemSessionId: number;
   store: WalletStampCardStore;
-  type: RedeemEventType;
-  result: RedeemEventResult;
+  type: CustomerRedeemEventType;
+  result: CustomerRedeemEventResult;
   occurredAt: string;
 }
 
@@ -437,8 +437,8 @@ export interface StoreStatisticsResponse {
 // Redeem Events Types (Owner)
 // =============================================================================
 
-export type RedeemEventType = 'CREATED' | 'COMPLETED' | 'EXPIRED';
-export type RedeemEventResult = 'SUCCESS' | 'FAILURE';
+export type OwnerRedeemEventType = 'CREATED' | 'COMPLETED' | 'EXPIRED';
+export type OwnerRedeemEventResult = 'SUCCESS' | 'FAILURE';
 
 export interface RedeemEventResponse {
   id: number;
@@ -446,8 +446,8 @@ export interface RedeemEventResponse {
   customerNickname: string;
   rewardName: string;
   stampCardTitle: string;
-  type: RedeemEventType;
-  result: RedeemEventResult;
+  type: OwnerRedeemEventType;
+  result: OwnerRedeemEventResult;
   occurredAt: string;
 }
 

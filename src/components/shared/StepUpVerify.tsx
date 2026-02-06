@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { Lock, Loader2, ShieldCheck } from 'lucide-react';
+import { Lock, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useOtpRequest, useOtpVerify } from '@/features/auth/hooks/useAuth';
