@@ -42,43 +42,57 @@ export function StampCardCarousel({
   return (
     <div className={cn("flex flex-col", className)}>
       {/* 캐러셀 */}
-      <div
-        ref={scrollRef}
-        className="flex overflow-x-auto snap-x snap-mandatory px-[7.5%] gap-4 no-scrollbar items-center py-6"
-        onScroll={handleScroll}
-      >
-        {cards.map((card, index) => (
-          <div
-            key={card.id}
-            className="snap-center shrink-0 w-[85%] transition-all duration-300"
-            style={{
-              transform: currentIndex === index ? "scale(1)" : "scale(0.95)",
-              opacity: currentIndex === index ? 1 : 0.7,
-            }}
-          >
+      {cards.length === 1 ? (
+        <div className="flex justify-center px-6 py-6">
+          <div className="w-[85%] max-w-sm">
             <StampCardItem
-              card={card}
-              isActive={currentIndex === index}
-              onClick={() => onCardSelect(card)}
+              card={cards[0]}
+              isActive
+              onClick={() => onCardSelect(cards[0])}
             />
           </div>
-        ))}
-      </div>
-
-      {/* 페이지네이션 점 */}
-      <div className="flex justify-center gap-2 mt-6">
-        {cards.map((_, i) => (
+        </div>
+      ) : (
+        <>
           <div
-            key={i}
-            className={cn(
-              "h-1.5 rounded-full transition-all duration-300",
-              i === currentIndex
-                ? "bg-kkookk-orange-500 w-4"
-                : "bg-slate-300 w-1.5",
-            )}
-          />
-        ))}
-      </div>
+            ref={scrollRef}
+            className="flex overflow-x-auto snap-x snap-mandatory px-[7.5%] gap-4 no-scrollbar items-center py-6"
+            onScroll={handleScroll}
+          >
+            {cards.map((card, index) => (
+              <div
+                key={card.id}
+                className="snap-center shrink-0 w-[85%] transition-all duration-300"
+                style={{
+                  transform: currentIndex === index ? "scale(1)" : "scale(0.95)",
+                  opacity: currentIndex === index ? 1 : 0.7,
+                }}
+              >
+                <StampCardItem
+                  card={card}
+                  isActive={currentIndex === index}
+                  onClick={() => onCardSelect(card)}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* 페이지네이션 점 */}
+          <div className="flex justify-center gap-2 mt-6">
+            {cards.map((_, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "h-1.5 rounded-full transition-all duration-300",
+                  i === currentIndex
+                    ? "bg-kkookk-orange-500 w-4"
+                    : "bg-slate-300 w-1.5",
+                )}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
