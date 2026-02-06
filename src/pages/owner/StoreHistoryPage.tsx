@@ -7,9 +7,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, MapPin, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { formatDateTime, maskPhone } from '@/lib/utils/format';
-import { MOCK_REQUESTS } from '@/lib/constants/mockData';
-import { useStore } from '@/features/store-management/hooks/useStore';
-import { useRedeemEventsInfinite } from '@/features/store-management/hooks/useStore';
+import { useStore, useStampEvents, useRedeemEvents } from '@/features/store-management/hooks/useStore';
 
 type HistoryFilter = 'all' | 'stamp' | 'reward';
 
@@ -34,23 +32,62 @@ export function StoreHistoryPage() {
   // API Hooks
   const { data: store, isLoading: storeLoading, error: storeError } = useStore(storeIdNum);
   const {
+    data: stampEventsData,
+    isLoading: stampLoading,
+    refetch: refetchStampEvents,
+    isFetching: stampRefreshing,
+  } = useStampEvents({ storeId: storeIdNum });
+  const {
     data: redeemEventsData,
     isLoading: redeemLoading,
     refetch: refetchRedeemEvents,
-    isFetching: isRefreshing,
-  } = useRedeemEventsInfinite(storeIdNum);
+    isFetching: redeemRefreshing,
+  } = useRedeemEvents({ storeId: storeIdNum });
+
+  const isRefreshing = stampRefreshing || redeemRefreshing;
 
   const handleRefresh = () => {
+    refetchStampEvents();
     refetchRedeemEvents();
   };
 
   const handleFilterChange = (filter: HistoryFilter) => {
     setHistoryFilter(filter);
-    // "전체" 또는 "리워드 사용" 탭 클릭 시 최신 데이터 fetch
-    if (filter === 'all' || filter === 'reward') {
-      refetchRedeemEvents();
-    }
   };
+
+  // Combine stamp and reward data from API (must be before early returns)
+  const combinedHistory = useMemo<HistoryItem[]>(() => {
+    const stampHistory: HistoryItem[] = (stampEventsData?.content ?? []).map((event) => ({
+      id: `stamp-${event.id}`,
+      time: event.occurredAt,
+      user: event.customerName,
+      phone: event.customerPhone,
+      type: 'stamp' as const,
+      count: event.delta,
+      content: `+${event.delta}`,
+    }));
+
+    const rewardHistory: HistoryItem[] = (redeemEventsData?.content ?? [])
+      .filter((event) => event.type === 'COMPLETED' && event.result === 'SUCCESS')
+      .map((event) => ({
+        id: `redeem-${event.id}`,
+        time: event.occurredAt,
+        user: event.customerNickname,
+        phone: '',
+        type: 'reward' as const,
+        content: event.rewardName || '쿠폰 사용',
+      }));
+
+    return [...stampHistory, ...rewardHistory].sort(
+      (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
+    );
+  }, [stampEventsData, redeemEventsData]);
+
+  // Filter history based on selected tab
+  const filteredHistory = combinedHistory.filter((item) => {
+    if (historyFilter === 'all') return true;
+    return item.type === historyFilter;
+  });
 
   // Loading state
   if (storeLoading) {
@@ -77,44 +114,6 @@ export function StoreHistoryPage() {
       </div>
     );
   }
-
-  // Combine stamp (mock) and reward (API) data
-  const combinedHistory = useMemo<HistoryItem[]>(() => {
-    const stampHistory: HistoryItem[] = MOCK_REQUESTS
-      .filter((req) => req.store === store.name && req.status !== 'pending' && req.type === 'stamp')
-      .map((req) => ({
-        id: req.id,
-        time: req.time,
-        user: req.user,
-        phone: req.phone,
-        type: 'stamp' as const,
-        count: req.count,
-        content: `+${req.count}`,
-      }));
-
-    const rewardHistory: HistoryItem[] = redeemEventsData?.pages.flatMap((page) =>
-      page.content
-        .filter((event) => event.type === 'COMPLETED' && event.result === 'SUCCESS')
-        .map((event) => ({
-          id: event.id,
-          time: event.occurredAt,
-          user: event.customerNickname,
-          phone: '010-****-****', // API doesn't provide phone number
-          type: 'reward' as const,
-          content: event.rewardName || '쿠폰 사용',
-        }))
-    ) ?? [];
-
-    return [...stampHistory, ...rewardHistory].sort(
-      (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
-    );
-  }, [redeemEventsData, store.name]);
-
-  // Filter history based on selected tab
-  const filteredHistory = combinedHistory.filter((item) => {
-    if (historyFilter === 'all') return true;
-    return item.type === historyFilter;
-  });
 
   return (
     <div className="flex flex-col h-full">
@@ -214,7 +213,7 @@ export function StoreHistoryPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {redeemLoading && historyFilter !== 'stamp' ? (
+                {(stampLoading || redeemLoading) ? (
                   <tr>
                     <td colSpan={5} className="p-12 text-center">
                       <Loader2 className="w-6 h-6 animate-spin text-kkookk-indigo mx-auto" />
@@ -234,7 +233,7 @@ export function StoreHistoryPage() {
                           {item.user}
                         </td>
                         <td className="p-4 text-sm text-kkookk-steel font-mono">
-                          {maskPhone(item.phone)}
+                          {item.phone ? maskPhone(item.phone) : '-'}
                         </td>
                         <td className="p-4">
                           <span

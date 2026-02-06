@@ -9,8 +9,12 @@ import type {
   CreateMigrationRequest,
   MigrationRequestResponse,
   MigrationListItemResponse,
+  MigrationSummary,
+  MigrationDetailResponse,
   MigrationApproveRequest,
+  MigrationApproveResponse,
   MigrationRejectRequest,
+  MigrationRejectResponse,
 } from '@/types/api';
 
 // =============================================================================
@@ -44,18 +48,18 @@ export async function getMigrationList(): Promise<MigrationListItemResponse[]> {
 
 export async function getStoreMigrations(
   storeId: number
-): Promise<MigrationRequestResponse[]> {
-  const response = await getRaw<{ migrations: MigrationRequestResponse[] }>(
+): Promise<MigrationSummary[]> {
+  const response = await getRaw<{ migrations: MigrationSummary[] }>(
     API_ENDPOINTS.OWNER.STORE_MIGRATIONS(storeId)
   );
   return response.migrations;
 }
 
-export async function getStoreMigration(
+export async function getStoreMigrationDetail(
   storeId: number,
   migrationId: number
-): Promise<MigrationRequestResponse> {
-  return getRaw<MigrationRequestResponse>(
+): Promise<MigrationDetailResponse> {
+  return getRaw<MigrationDetailResponse>(
     API_ENDPOINTS.OWNER.STORE_MIGRATION(storeId, migrationId)
   );
 }
@@ -64,8 +68,8 @@ export async function approveMigration(
   storeId: number,
   migrationId: number,
   data: MigrationApproveRequest
-): Promise<MigrationRequestResponse> {
-  return postRaw<MigrationRequestResponse, MigrationApproveRequest>(
+): Promise<MigrationApproveResponse> {
+  return postRaw<MigrationApproveResponse, MigrationApproveRequest>(
     API_ENDPOINTS.OWNER.STORE_MIGRATION_APPROVE(storeId, migrationId),
     data
   );
@@ -75,8 +79,8 @@ export async function rejectMigration(
   storeId: number,
   migrationId: number,
   data: MigrationRejectRequest
-): Promise<MigrationRequestResponse> {
-  return postRaw<MigrationRequestResponse, MigrationRejectRequest>(
+): Promise<MigrationRejectResponse> {
+  return postRaw<MigrationRejectResponse, MigrationRejectRequest>(
     API_ENDPOINTS.OWNER.STORE_MIGRATION_REJECT(storeId, migrationId),
     data
   );

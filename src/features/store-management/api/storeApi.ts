@@ -10,6 +10,7 @@ import type {
   StoreResponse,
   QrCodeResponse,
   StoreStatisticsResponse,
+  StampEventResponse,
   RedeemEventResponse,
   PageResponse,
 } from '@/types/api';
@@ -75,6 +76,28 @@ export async function getStoreStatistics(
     {
       startDate: params.startDate,
       endDate: params.endDate,
+    }
+  );
+}
+
+// =============================================================================
+// Stamp Events
+// =============================================================================
+
+export interface GetStampEventsParams {
+  storeId: number;
+  page?: number;
+  size?: number;
+}
+
+export async function getStampEvents(
+  params: GetStampEventsParams
+): Promise<PageResponse<StampEventResponse>> {
+  return getRaw<PageResponse<StampEventResponse>>(
+    API_ENDPOINTS.OWNER.STORE_STAMP_EVENTS(params.storeId),
+    {
+      page: params.page ?? 0,
+      size: params.size ?? 20,
     }
   );
 }

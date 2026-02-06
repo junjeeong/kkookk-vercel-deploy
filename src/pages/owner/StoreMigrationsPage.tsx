@@ -3,8 +3,10 @@
  * 매장 전환 신청 관리 페이지
  */
 
+import { useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, MapPin, Loader2, AlertCircle } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { MigrationManager } from '@/features/migration/components/admin';
 import { useStore } from '@/features/store-management/hooks/useStore';
 import {
@@ -12,10 +14,24 @@ import {
   useApproveMigration,
   useRejectMigration,
 } from '@/features/migration/hooks/useOwnerMigration';
-import type { MigrationStatus } from '@/types/domain';
+import { getStoreMigrationDetail } from '@/features/migration/api/migrationApi';
+import { QUERY_KEYS } from '@/lib/api/endpoints';
+import type { MigrationStatus, MigrationRequest } from '@/types/domain';
+import type { StampMigrationStatus } from '@/types/api';
+
+/** Map API status to domain status */
+function toMigrationStatus(apiStatus: StampMigrationStatus): MigrationStatus {
+  switch (apiStatus) {
+    case 'SUBMITTED': return 'pending';
+    case 'APPROVED': return 'approved';
+    case 'REJECTED': return 'rejected';
+    default: return 'pending';
+  }
+}
 
 export function StoreMigrationsPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { storeId } = useParams<{ storeId: string }>();
 
   const storeIdNum = Number(storeId);
@@ -28,23 +44,46 @@ export function StoreMigrationsPage() {
     refetch: refetchMigrations,
     isFetching: isRefreshing,
   } = useStoreMigrations(storeIdNum);
-  const approveMigration = useApproveMigration();
-  const rejectMigration = useRejectMigration();
+  const approveMutation = useApproveMigration();
+  const rejectMutation = useRejectMigration();
+
+  // Image detail state
+  const [imageDetail, setImageDetail] = useState<{ imageUrl: string; count: number } | null>(null);
+  const [imageLoading, setImageLoading] = useState(false);
 
   const handleRefresh = () => {
     refetchMigrations();
   };
 
-  // Transform API data to component format
-  // Safely handle migrations data (could be array, paginated response, or undefined)
-  const migrations = (Array.isArray(apiMigrations) ? apiMigrations : []).map((m) => ({
+  // Fetch migration detail for image preview
+  const handleViewImage = useCallback(async (migrationId: string) => {
+    const id = Number(migrationId);
+    if (!storeIdNum || !id) return;
+
+    setImageLoading(true);
+    try {
+      const detail = await queryClient.fetchQuery({
+        queryKey: QUERY_KEYS.storeMigration(storeIdNum, id),
+        queryFn: () => getStoreMigrationDetail(storeIdNum, id),
+        staleTime: 60_000,
+      });
+      setImageDetail({ imageUrl: detail.imageUrl, count: detail.claimedStampCount });
+    } catch {
+      setImageDetail(null);
+    } finally {
+      setImageLoading(false);
+    }
+  }, [storeIdNum, queryClient]);
+
+  // Transform API MigrationSummary[] to domain MigrationRequest[]
+  const migrations: MigrationRequest[] = (apiMigrations ?? []).map((m) => ({
     id: String(m.id),
     storeName: store?.name ?? '',
+    customerName: m.customerName,
+    customerPhone: m.customerPhone,
     count: m.claimedStampCount,
-    status: m.status.toLowerCase() as MigrationStatus,
+    status: toMigrationStatus(m.status),
     date: new Date(m.requestedAt),
-    imageUrl: m.imageData,
-    rejectReason: m.rejectReason ?? undefined,
   }));
 
   const pendingMigrations = migrations.filter((m) => m.status === 'pending');
@@ -73,13 +112,13 @@ export function StoreMigrationsPage() {
     const migrationId = Number(id);
 
     if (newStatus === 'approved' && approvedCount !== undefined) {
-      approveMigration.mutate({
+      approveMutation.mutate({
         storeId: storeIdNum,
         migrationId,
         data: { approvedStampCount: approvedCount },
       });
     } else if (newStatus === 'rejected' && rejectReason) {
-      rejectMigration.mutate({
+      rejectMutation.mutate({
         storeId: storeIdNum,
         migrationId,
         data: { rejectReason },
@@ -135,10 +174,13 @@ export function StoreMigrationsPage() {
       <div className="flex-1 overflow-y-auto">
         <MigrationManager
           migrations={migrations}
-          storeName={store.name}
           onAction={handleAction}
           onRefresh={handleRefresh}
           isRefreshing={isRefreshing}
+          onViewImage={handleViewImage}
+          imageDetail={imageDetail}
+          imageLoading={imageLoading}
+          onCloseImage={() => setImageDetail(null)}
         />
       </div>
     </div>

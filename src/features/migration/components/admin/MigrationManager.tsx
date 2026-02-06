@@ -3,8 +3,7 @@
  * 마이그레이션 요청 관리 어드민 뷰
  */
 
-import { useState } from 'react';
-import { Image as ImageIcon, RefreshCw } from 'lucide-react';
+import { Image as ImageIcon, RefreshCw, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { formatShortDate } from '@/lib/utils/format';
@@ -12,23 +11,25 @@ import type { MigrationRequest, MigrationStatus } from '@/types/domain';
 
 interface MigrationManagerProps {
   migrations: MigrationRequest[];
-  storeName: string;
   onAction: (id: string, newStatus: MigrationStatus, approvedCount?: number, rejectReason?: string) => void;
   onRefresh?: () => void;
   isRefreshing?: boolean;
+  onViewImage?: (id: string) => void;
+  imageDetail?: { imageUrl: string; count: number } | null;
+  imageLoading?: boolean;
+  onCloseImage?: () => void;
 }
 
 export function MigrationManager({
   migrations,
-  storeName,
   onAction,
   onRefresh,
   isRefreshing = false,
+  onViewImage,
+  imageDetail,
+  imageLoading = false,
+  onCloseImage,
 }: MigrationManagerProps) {
-  const [viewImage, setViewImage] = useState<MigrationRequest | null>(null);
-
-  const storeMigrations = migrations.filter((m) => m.storeName === storeName);
-
   const getStatusBadge = (status: MigrationStatus) => {
     switch (status) {
       case 'pending':
@@ -62,7 +63,7 @@ export function MigrationManager({
           )}
         </div>
         <span className="text-sm text-kkookk-steel">
-          총 {storeMigrations.length}건
+          총 {migrations.length}건
         </span>
       </div>
 
@@ -87,20 +88,27 @@ export function MigrationManager({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {storeMigrations.map((mig) => (
+            {migrations.map((mig) => (
               <tr key={mig.id} className="hover:bg-slate-50 transition-colors">
                 <td className="p-4 pl-6 text-sm text-kkookk-steel font-mono">
                   {formatShortDate(mig.date)}
                 </td>
-                <td className="p-4 text-sm font-bold text-kkookk-navy">
-                  익명 사용자
+                <td className="p-4">
+                  <div className="text-sm font-bold text-kkookk-navy">
+                    {mig.customerName || '이름 없음'}
+                  </div>
+                  {mig.customerPhone && (
+                    <div className="text-xs text-kkookk-steel mt-0.5">
+                      {mig.customerPhone}
+                    </div>
+                  )}
                 </td>
                 <td className="p-4 text-sm font-bold text-kkookk-navy">
                   {mig.count}개
                 </td>
                 <td className="p-4">
                   <button
-                    onClick={() => setViewImage(mig)}
+                    onClick={() => onViewImage?.(mig.id)}
                     className="flex items-center gap-1 text-xs font-bold text-kkookk-indigo hover:underline"
                   >
                     <ImageIcon size={14} /> 확인하기
@@ -141,7 +149,7 @@ export function MigrationManager({
                 </td>
               </tr>
             ))}
-            {storeMigrations.length === 0 && (
+            {migrations.length === 0 && (
               <tr>
                 <td
                   colSpan={6}
@@ -155,29 +163,32 @@ export function MigrationManager({
         </table>
       </div>
 
-      {/* 이미지 미리보기 모달 */}
-      {viewImage && (
+      {/* 이미지 미리보기 모달 (로딩 or 결과) */}
+      {(imageLoading || imageDetail) && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-kkookk-navy/80 backdrop-blur-sm"
           role="presentation"
         >
-          {/* 배경 버튼 */}
           <button
             type="button"
             aria-label="이미지 미리보기 닫기"
             className="absolute inset-0 w-full h-full cursor-default"
-            onClick={() => setViewImage(null)}
+            onClick={onCloseImage}
           />
-          {/* 다이얼로그 패널 */}
           <div
             role="dialog"
             aria-label="이미지 미리보기"
             aria-modal="true"
             className="relative bg-white rounded-2xl p-2 max-w-sm w-full animate-in zoom-in-95"
           >
-            {viewImage.imageUrl ? (
+            {imageLoading ? (
+              <div className="aspect-[3/4] bg-slate-100 rounded-xl flex flex-col items-center justify-center text-slate-400">
+                <Loader2 size={32} className="animate-spin mb-2" />
+                <p className="text-sm">이미지 불러오는 중...</p>
+              </div>
+            ) : imageDetail?.imageUrl ? (
               <img
-                src={viewImage.imageUrl}
+                src={imageDetail.imageUrl}
                 alt="마이그레이션 증빙 사진"
                 className="aspect-[3/4] w-full object-contain rounded-xl bg-slate-100"
               />
@@ -187,12 +198,14 @@ export function MigrationManager({
                 <p className="text-sm">이미지 없음</p>
               </div>
             )}
-            <div className="mt-2 px-2 text-center">
-              <p className="text-sm text-kkookk-navy font-bold">신청 스탬프: {viewImage.count}개</p>
-            </div>
+            {imageDetail && (
+              <div className="mt-2 px-2 text-center">
+                <p className="text-sm text-kkookk-navy font-bold">신청 스탬프: {imageDetail.count}개</p>
+              </div>
+            )}
             <button
               type="button"
-              onClick={() => setViewImage(null)}
+              onClick={onCloseImage}
               className="w-full py-3 mt-2 font-bold text-kkookk-navy hover:bg-slate-50 rounded-xl"
             >
               닫기
