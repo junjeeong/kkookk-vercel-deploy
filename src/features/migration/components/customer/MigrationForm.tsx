@@ -4,8 +4,8 @@
  */
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronDown, Camera, Check, Info, AlertCircle } from 'lucide-react';
+import { useCustomerNavigate } from '@/hooks/useCustomerNavigate';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { MOCK_OTHER_CARDS, INITIAL_STAMP_CARD, MOCK_MIGRATIONS } from '@/lib/constants/mockData';
@@ -20,7 +20,7 @@ export function MigrationForm({
   cards = [INITIAL_STAMP_CARD, ...MOCK_OTHER_CARDS],
   existingMigrations = MOCK_MIGRATIONS,
 }: MigrationFormProps) {
-  const navigate = useNavigate();
+  const { customerNavigate } = useCustomerNavigate();
   const [count, setCount] = useState('');
   const [file, setFile] = useState<File | null>(null);
 
@@ -77,7 +77,7 @@ export function MigrationForm({
 
     // TODO: API 연동 후 실제 제출 처리
     console.log('Migration submitted:', selectedStoreName, parseInt(count), file);
-    navigate('/customer/migrations');
+    customerNavigate('/migrations');
   };
 
   return (
@@ -85,7 +85,7 @@ export function MigrationForm({
       {/* 헤더 */}
       <div className="px-6 py-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center sticky top-0 bg-white z-10 -mt-12 pt-12">
         <button
-          onClick={() => navigate('/customer/migrations')}
+          onClick={() => customerNavigate('/migrations')}
           className="p-2 -ml-2 text-kkookk-steel hover:text-kkookk-navy"
           aria-label="뒤로 가기"
         >

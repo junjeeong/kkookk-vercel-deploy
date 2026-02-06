@@ -14,6 +14,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { CustomerHistoryPage } from "@/pages/customer/CustomerHistoryPage";
 import { CustomerLandingPage } from "@/pages/customer/CustomerLandingPage";
 import { CustomerSettingsPage } from "@/pages/customer/CustomerSettingsPage";
+import { CustomerStoreSelectPage } from "@/pages/customer/CustomerStoreSelectPage";
 
 // 고객 기능 컴포넌트 (페이지로 래핑될 예정)
 import { CustomerLoginForm, CustomerSignupForm } from "@/features/auth";
@@ -26,6 +27,7 @@ import { CardDetailView, WalletPage } from "@/features/wallet";
 import { OwnerLoginPage } from "@/features/auth/pages/OwnerLoginPage";
 import {
   StampCardCreatePage,
+  StampCardEditPage,
   StampCardStatsPage,
   StoreCreatePage,
   StoreDetailPage,
@@ -40,6 +42,7 @@ import {
   TerminalHistoryPage,
   TerminalLoginPage,
   TerminalSettingsPage,
+  TerminalStoreSelectPage,
 } from "@/pages/terminal";
 
 export const router = createBrowserRouter([
@@ -55,14 +58,29 @@ export const router = createBrowserRouter([
     element: <LauncherPage />,
   },
 
-  // 고객 라우트
+  // 고객 매장 선택 (시뮬레이션 진입점)
   {
-    path: "/customer",
+    path: "/customer/stores",
+    element: <CustomerStoreSelectPage />,
+  },
+
+  // 고객 pre-login 라우트 (storeId 기반 — QR 스캔 진입)
+  {
+    path: "/stores/:storeId/customer",
     element: <CustomerLayout />,
     children: [
       { index: true, element: <CustomerLandingPage /> },
       { path: "login", element: <CustomerLoginForm /> },
       { path: "signup", element: <CustomerSignupForm /> },
+    ],
+  },
+
+  // 고객 post-login 라우트 (storeId 없음 — 로그인 후)
+  {
+    path: "/customer",
+    element: <CustomerLayout />,
+    children: [
+      { index: true, element: <Navigate to="wallet" replace /> },
       { path: "wallet", element: <WalletPage /> },
       { path: "wallet/:cardId", element: <CardDetailView /> },
       { path: "wallet/:cardId/stamp", element: <RequestStampButton /> },
@@ -97,6 +115,10 @@ export const router = createBrowserRouter([
         element: <StampCardCreatePage />,
       },
       {
+        path: "stores/:storeId/stamp-cards/:cardId/edit",
+        element: <StampCardEditPage />,
+      },
+      {
         path: "stores/:storeId/stamp-cards/:cardId/stats",
         element: <StampCardStatsPage />,
       },
@@ -107,6 +129,12 @@ export const router = createBrowserRouter([
   {
     path: "/terminal/login",
     element: <TerminalLoginPage />,
+  },
+
+  // 터미널 매장 선택 (레이아웃 없음)
+  {
+    path: "/terminal/stores",
+    element: <TerminalStoreSelectPage />,
   },
 
   // 터미널 라우트 (레이아웃 포함)

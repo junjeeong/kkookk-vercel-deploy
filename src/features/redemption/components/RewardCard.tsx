@@ -1,12 +1,13 @@
 /**
  * RewardCard 컴포넌트
- * 개별 리워드 카드 표시
+ * 개별 리워드 카드 표시 (스탬프 카드 디자인 반영)
  */
 
 import { Coffee } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import type { Reward } from '@/types/domain';
+import { parseDesignJson } from '@/features/wallet/utils/cardDesign';
 
 interface RewardCardProps {
   reward: Reward;
@@ -14,6 +15,9 @@ interface RewardCardProps {
 }
 
 export function RewardCard({ reward, onRedeem }: RewardCardProps) {
+  const design = parseDesignJson(reward.designJson);
+  const hasImage = !!design.backgroundImage;
+
   return (
     <div
       className={cn(
@@ -23,31 +27,42 @@ export function RewardCard({ reward, onRedeem }: RewardCardProps) {
           : 'hover:scale-[1.02] active:scale-95'
       )}
     >
-      {/* 그라디언트 카드 헤더 */}
+      {/* 카드 헤더 */}
       <div
         className={cn(
-          'bg-gradient-to-r p-6 text-white relative overflow-hidden h-32 flex flex-col justify-between',
-          reward.gradient
+          'p-6 text-white relative overflow-hidden h-32 flex flex-col justify-between',
+          !hasImage && `bg-gradient-to-r ${design.bgGradient}`,
         )}
+        style={hasImage ? {
+          backgroundImage: `url(${design.backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        } : undefined}
       >
+        {hasImage && (
+          <div className="absolute inset-0 bg-black/30" />
+        )}
         <div className="relative z-10">
           <p
             className={cn(
               'text-xs font-bold mb-1',
-              reward.isUsed ? 'text-slate-300' : 'text-orange-100 opacity-90'
+              reward.isUsed ? 'text-slate-300' : 'text-white/70'
             )}
           >
             {reward.storeName}
           </p>
-          <h3 className="text-2xl font-bold">{reward.name}</h3>
+          <h3 className="text-xl font-bold">{reward.stampCardTitle}</h3>
+          <p className="text-sm text-white/90 mt-0.5">{reward.name}</p>
         </div>
         <p className="text-white/80 text-xs relative z-10">
           {reward.isUsed ? '사용 완료' : `${reward.expiry} 까지`}
         </p>
-        <Coffee
-          className="absolute -right-4 -bottom-4 text-white/10 w-32 h-32"
-          strokeWidth={1}
-        />
+        {!hasImage && (
+          <Coffee
+            className="absolute -right-4 -bottom-4 text-white/10 w-32 h-32"
+            strokeWidth={1}
+          />
+        )}
       </div>
 
       {/* 카드 푸터 */}

@@ -4,39 +4,76 @@
  */
 
 import { QRPosterModal } from "@/features/store-management/components";
-import { MOCK_STORES } from "@/lib/constants/mockData";
-import type { Store } from "@/types/domain";
+import { useStores, useStoreQR } from "@/features/store-management/hooks/useStore";
+import type { StoreResponse } from "@/types/api";
 import {
   ArrowRight,
+  Loader2,
   MapPin,
   Plus,
   QrCode,
   Store as StoreIcon,
+  AlertCircle,
 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-interface StoreListPageProps {
-  stores?: Store[];
-}
-
-export function StoreListPage({ stores = MOCK_STORES }: StoreListPageProps) {
+export function StoreListPage() {
   const navigate = useNavigate();
-  const [qrModalStore, setQrModalStore] = useState<Store | null>(null);
+  const [qrModalStore, setQrModalStore] = useState<StoreResponse | null>(null);
+
+  // API Hook
+  const { data: stores, isLoading, error, refetch } = useStores();
+  const { data: qrData } = useStoreQR(qrModalStore?.id);
 
   const handleStoreClick = (storeId: number) => {
     navigate(`/owner/stores/${storeId}`);
   };
 
-  const handleQRClick = (e: React.MouseEvent, store: Store) => {
+  const handleQRClick = (e: React.MouseEvent, store: StoreResponse) => {
     e.stopPropagation();
     setQrModalStore(store);
   };
 
   const handleDownloadQR = () => {
-    alert("QR 포스터 다운로드 기능은 API 연동 후 구현됩니다.");
+    if (qrData?.qrCodeBase64) {
+      // Create download link for QR image
+      const link = document.createElement("a");
+      link.href = `data:image/png;base64,${qrData.qrCodeBase64}`;
+      link.download = `${qrModalStore?.name}_QR.png`;
+      link.click();
+    }
     setQrModalStore(null);
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full max-w-6xl p-8 mx-auto min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-kkookk-indigo" />
+        <p className="mt-4 text-kkookk-steel">매장 목록을 불러오는 중...</p>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full max-w-6xl p-8 mx-auto min-h-[400px]">
+        <AlertCircle className="w-12 h-12 text-red-500" />
+        <p className="mt-4 text-lg font-medium text-kkookk-navy">매장 목록을 불러올 수 없습니다</p>
+        <p className="mt-1 text-sm text-kkookk-steel">잠시 후 다시 시도해주세요</p>
+        <button
+          onClick={() => refetch()}
+          className="px-6 py-2 mt-4 font-bold text-white transition-colors bg-kkookk-navy rounded-lg hover:bg-slate-800"
+        >
+          다시 시도
+        </button>
+      </div>
+    );
+  }
+
+  const storeList = stores ?? [];
 
   return (
     <div className="w-full max-w-6xl p-8 mx-auto">
@@ -57,7 +94,7 @@ export function StoreListPage({ stores = MOCK_STORES }: StoreListPageProps) {
       </div>
 
       {/* 매장 목록 */}
-      {stores.length === 0 ? (
+      {storeList.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-kkookk-steel">
           <StoreIcon size={64} className="mb-4 opacity-20" />
           <p className="text-lg font-medium">등록된 매장이 없습니다.</p>
@@ -71,7 +108,7 @@ export function StoreListPage({ stores = MOCK_STORES }: StoreListPageProps) {
         </div>
       ) : (
         <div className="grid gap-4">
-          {stores.map((store) => (
+          {storeList.map((store) => (
             <div
               key={store.id}
               role="button"
@@ -94,25 +131,25 @@ export function StoreListPage({ stores = MOCK_STORES }: StoreListPageProps) {
                     {store.name}
                     <span
                       className={`text-[10px] px-2 py-0.5 rounded-full ${
-                        store.status === "OPEN"
+                        store.status === "ACTIVE"
                           ? "bg-green-100 text-green-700"
                           : "bg-slate-100 text-slate-500"
                       }`}
                     >
-                      {store.status === "OPEN" ? "영업중" : "영업종료"}
+                      {store.status === "ACTIVE" ? "영업중" : "영업종료"}
                     </span>
                   </h3>
                   <p className="flex items-center gap-1 mt-1 text-sm text-kkookk-steel">
-                    <MapPin size={14} /> {store.address}
+                    <MapPin size={14} /> {store.address || "주소 미등록"}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-8">
                 <div className="text-right">
-                  <p className="text-xs text-kkookk-steel">활성 스탬프 카드</p>
+                  <p className="text-xs text-kkookk-steel">상태</p>
                   <p className="text-lg font-bold text-kkookk-navy">
-                    {store.activeCards}개
+                    {store.status === "ACTIVE" ? "활성" : "비활성"}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -136,6 +173,9 @@ export function StoreListPage({ stores = MOCK_STORES }: StoreListPageProps) {
       <QRPosterModal
         isOpen={!!qrModalStore}
         storeName={qrModalStore?.name || ""}
+        storeId={qrModalStore?.id}
+        qrCodeBase64={qrData?.qrCodeBase64}
+        isLoading={!!qrModalStore && !qrData}
         onClose={() => setQrModalStore(null)}
         onDownload={handleDownloadQR}
       />

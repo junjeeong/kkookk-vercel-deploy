@@ -3,41 +3,88 @@
  * 매장 전환 신청 관리 페이지
  */
 
-import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, MapPin } from 'lucide-react';
+import { ChevronLeft, MapPin, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { MigrationManager } from '@/features/migration/components/admin';
-import { MOCK_MIGRATIONS, MOCK_STORES } from '@/lib/constants/mockData';
-import type { MigrationRequest, MigrationStatus } from '@/types/domain';
+import { useStore } from '@/features/store-management/hooks/useStore';
+import {
+  useStoreMigrations,
+  useApproveMigration,
+  useRejectMigration,
+} from '@/features/migration/hooks/useOwnerMigration';
+import type { MigrationStatus } from '@/types/domain';
 
-interface StoreMigrationsPageProps {
-  migrations?: MigrationRequest[];
-}
-
-export function StoreMigrationsPage({
-  migrations: initialMigrations = MOCK_MIGRATIONS,
-}: StoreMigrationsPageProps) {
+export function StoreMigrationsPage() {
   const navigate = useNavigate();
   const { storeId } = useParams<{ storeId: string }>();
-  const [migrations, setMigrations] = useState(initialMigrations);
 
-  const store = MOCK_STORES.find((s) => s.id === Number(storeId));
-  const pendingMigrations = migrations.filter(
-    (m) => m.storeName === store?.name && m.status === 'pending'
-  );
+  const storeIdNum = Number(storeId);
 
-  if (!store) {
+  // API Hooks
+  const { data: store, isLoading: storeLoading, error: storeError } = useStore(storeIdNum);
+  const {
+    data: apiMigrations,
+    isLoading: migrationsLoading,
+    refetch: refetchMigrations,
+    isFetching: isRefreshing,
+  } = useStoreMigrations(storeIdNum);
+  const approveMigration = useApproveMigration();
+  const rejectMigration = useRejectMigration();
+
+  const handleRefresh = () => {
+    refetchMigrations();
+  };
+
+  // Transform API data to component format
+  // Safely handle migrations data (could be array, paginated response, or undefined)
+  const migrations = (Array.isArray(apiMigrations) ? apiMigrations : []).map((m) => ({
+    id: String(m.id),
+    storeName: store?.name ?? '',
+    count: m.claimedStampCount,
+    status: m.status.toLowerCase() as MigrationStatus,
+    date: new Date(m.requestedAt),
+    imageUrl: m.imageData,
+    rejectReason: m.rejectReason ?? undefined,
+  }));
+
+  const pendingMigrations = migrations.filter((m) => m.status === 'pending');
+
+  // Loading state
+  if (storeLoading || migrationsLoading) {
     return (
-      <div className="p-8 text-center">
-        <p className="text-kkookk-steel">매장을 찾을 수 없습니다.</p>
+      <div className="flex flex-col items-center justify-center p-8 min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-kkookk-indigo" />
+        <p className="mt-4 text-kkookk-steel">불러오는 중...</p>
       </div>
     );
   }
 
-  const handleAction = (id: string, newStatus: MigrationStatus) => {
-    setMigrations((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, status: newStatus } : m))
+  // Error or not found state
+  if (storeError || !store) {
+    return (
+      <div className="p-8 text-center">
+        <AlertCircle className="w-12 h-12 mx-auto text-red-500" />
+        <p className="mt-4 text-kkookk-steel">매장을 찾을 수 없습니다.</p>
+      </div>
     );
+  }
+
+  const handleAction = (id: string, newStatus: MigrationStatus, approvedCount?: number, rejectReason?: string) => {
+    const migrationId = Number(id);
+
+    if (newStatus === 'approved' && approvedCount !== undefined) {
+      approveMigration.mutate({
+        storeId: storeIdNum,
+        migrationId,
+        data: { approvedStampCount: approvedCount },
+      });
+    } else if (newStatus === 'rejected' && rejectReason) {
+      rejectMigration.mutate({
+        storeId: storeIdNum,
+        migrationId,
+        data: { rejectReason },
+      });
+    }
   };
 
   return (
@@ -54,7 +101,7 @@ export function StoreMigrationsPage({
           <div>
             <h2 className="text-2xl font-bold text-kkookk-navy">{store.name}</h2>
             <p className="text-kkookk-steel text-sm flex items-center gap-1">
-              <MapPin size={12} /> {store.address}
+              <MapPin size={12} /> {store.address || '주소 미등록'}
             </p>
           </div>
         </div>
@@ -90,6 +137,8 @@ export function StoreMigrationsPage({
           migrations={migrations}
           storeName={store.name}
           onAction={handleAction}
+          onRefresh={handleRefresh}
+          isRefreshing={isRefreshing}
         />
       </div>
     </div>

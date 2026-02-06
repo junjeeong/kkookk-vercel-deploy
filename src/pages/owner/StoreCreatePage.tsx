@@ -5,7 +5,8 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Search } from 'lucide-react';
+import { ChevronLeft, Search, Loader2 } from 'lucide-react';
+import { useCreateStore } from '@/features/store-management/hooks/useStore';
 import { STORE_CATEGORIES } from '@/lib/constants/mockData';
 
 interface StoreFormData {
@@ -18,6 +19,7 @@ interface StoreFormData {
 
 export function StoreCreatePage() {
   const navigate = useNavigate();
+  const createStore = useCreateStore();
   const [formData, setFormData] = useState<StoreFormData>({
     name: '',
     address: '',
@@ -25,7 +27,6 @@ export function StoreCreatePage() {
     category: '',
     description: '',
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -42,11 +43,22 @@ export function StoreCreatePage() {
   };
 
   const handleSubmit = async () => {
-    setIsSubmitting(true);
-    // TODO: API 연동
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    alert('매장이 성공적으로 등록되었습니다.');
-    navigate('/owner/stores');
+    createStore.mutate(
+      {
+        name: formData.name,
+        address: formData.address || undefined,
+        phone: formData.phone || undefined,
+        status: 'ACTIVE', // 기본값: 활성 상태
+      },
+      {
+        onSuccess: () => {
+          navigate('/owner/stores');
+        },
+        onError: (error) => {
+          alert(`매장 등록 실패: ${error.message}`);
+        },
+      }
+    );
   };
 
   return (
@@ -177,10 +189,11 @@ export function StoreCreatePage() {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={isSubmitting || !formData.name || !formData.address}
-            className="px-6 py-3 bg-kkookk-navy text-white font-bold rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={createStore.isPending || !formData.name || !formData.address}
+            className="px-6 py-3 bg-kkookk-navy text-white font-bold rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            {isSubmitting ? '등록 중...' : '매장 등록하기'}
+            {createStore.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+            {createStore.isPending ? '등록 중...' : '매장 등록하기'}
           </button>
         </div>
       </div>

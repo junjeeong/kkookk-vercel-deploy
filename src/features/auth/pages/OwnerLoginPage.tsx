@@ -9,12 +9,15 @@ import { useNavigate } from "react-router-dom";
 import { LoginForm } from "../components/LoginForm";
 import { PhoneVerification } from "../components/PhoneVerification";
 import { SignupForm } from "../components/SignupForm";
+import { useOwnerLogin, useOwnerSignup, useOtpRequest, useOtpVerify } from "../hooks/useAuth";
+import { useAuth } from "@/app/providers/AuthProvider";
 import type { AuthMode } from "../types";
 
 interface OwnerLoginPageProps {
   title?: string;
   subtitle?: string;
   onLoginSuccess?: () => void;
+  onLoginSuccessWithCredentials?: (email: string, password: string) => void;
   onBack?: () => void;
   isTabletMode?: boolean;
 }
@@ -23,12 +26,21 @@ export function OwnerLoginPage({
   title = "사장님 백오피스",
   subtitle = "",
   onLoginSuccess,
+  onLoginSuccessWithCredentials,
   onBack,
   isTabletMode = false,
 }: OwnerLoginPageProps) {
   const navigate = useNavigate();
+  const { refreshAuthState } = useAuth();
+
+  // API Hooks
+  const ownerLogin = useOwnerLogin();
+  const ownerSignup = useOwnerSignup();
+  const otpRequest = useOtpRequest();
+  const otpVerify = useOtpVerify();
 
   const handleLoginSuccess = () => {
+    refreshAuthState();
     if (onLoginSuccess) {
       onLoginSuccess();
     } else {
@@ -44,16 +56,30 @@ export function OwnerLoginPage({
     }
   };
   const [authMode, setAuthMode] = useState<AuthMode>("login");
-  const [isLoading, setIsLoading] = useState(false);
   const [phone, setPhone] = useState("");
+  const [signupData, setSignupData] = useState<{
+    name: string;
+    phone: string;
+    email: string;
+    password: string;
+  } | null>(null);
 
-  const handleLogin = (_email: string, _password: string) => {
-    setIsLoading(true);
-    // 로그인 시뮬레이션
-    setTimeout(() => {
-      setIsLoading(false);
-      handleLoginSuccess();
-    }, 800);
+  const isLoading = ownerLogin.isPending || ownerSignup.isPending || otpRequest.isPending || otpVerify.isPending;
+
+  const handleLogin = (email: string, password: string) => {
+    ownerLogin.mutate(
+      { email, password },
+      {
+        onSuccess: () => {
+          onLoginSuccessWithCredentials?.(email, password);
+          handleLoginSuccess();
+        },
+        onError: (error) => {
+          alert("로그인 실패: 이메일 또는 비밀번호를 확인해주세요.");
+          console.error("Login error:", error);
+        },
+      }
+    );
   };
 
   const handleSignup = (data: {
@@ -62,32 +88,85 @@ export function OwnerLoginPage({
     email: string;
     password: string;
   }) => {
-    setIsLoading(true);
     setPhone(data.phone);
-    // 회원가입 및 OTP 발송 시뮬레이션
-    setTimeout(() => {
-      setIsLoading(false);
-      setAuthMode("verify");
-      alert(`[인증번호 발송됨]\n${data.phone}로 인증번호 123456을 보냈습니다.`);
-    }, 1000);
+    setSignupData(data);
+
+    // OTP 요청
+    otpRequest.mutate(
+      { phone: data.phone },
+      {
+        onSuccess: (response) => {
+          setAuthMode("verify");
+          if (response.devOtpCode) {
+            alert(`[개발용 인증번호]\n${data.phone}로 인증번호 ${response.devOtpCode}을 보냈습니다.`);
+          } else {
+            alert(`인증번호가 ${data.phone}로 발송되었습니다.`);
+          }
+        },
+        onError: (error) => {
+          alert("인증번호 발송 실패. 잠시 후 다시 시도해주세요.");
+          console.error("OTP request error:", error);
+        },
+      }
+    );
   };
 
   const handleVerify = (code: string) => {
-    if (code !== "123456") {
-      alert("인증번호가 일치하지 않습니다. (123456)");
-      return;
-    }
-    setIsLoading(true);
-    // 인증 시뮬레이션
-    setTimeout(() => {
-      setIsLoading(false);
-      alert("휴대폰 인증이 완료되었습니다. 로그인해주세요.");
-      setAuthMode("login");
-    }, 1000);
+    if (!signupData) return;
+
+    otpVerify.mutate(
+      { phone, code },
+      {
+        onSuccess: (response) => {
+          if (response.verified) {
+            // OTP 인증 성공 후 회원가입 진행
+            ownerSignup.mutate(
+              {
+                email: signupData.email,
+                password: signupData.password,
+                name: signupData.name,
+                phoneNumber: signupData.phone,
+              },
+              {
+                onSuccess: () => {
+                  alert("회원가입이 완료되었습니다. 로그인해주세요.");
+                  setAuthMode("login");
+                  setSignupData(null);
+                },
+                onError: (error) => {
+                  alert("회원가입 실패. 이미 등록된 이메일일 수 있습니다.");
+                  console.error("Signup error:", error);
+                },
+              }
+            );
+          } else {
+            alert("인증번호가 일치하지 않습니다.");
+          }
+        },
+        onError: (error) => {
+          alert("인증 실패. 인증번호를 확인해주세요.");
+          console.error("OTP verify error:", error);
+        },
+      }
+    );
   };
 
   const handleResend = () => {
-    alert(`[인증번호 재발송]\n${phone}로 인증번호 123456을 보냈습니다.`);
+    otpRequest.mutate(
+      { phone },
+      {
+        onSuccess: (response) => {
+          if (response.devOtpCode) {
+            alert(`[개발용 인증번호]\n${phone}로 인증번호 ${response.devOtpCode}을 재발송했습니다.`);
+          } else {
+            alert(`인증번호가 ${phone}로 재발송되었습니다.`);
+          }
+        },
+        onError: () => {
+          alert("인증번호 재발송 실패. 1분 후 다시 시도해주세요.");
+        },
+      }
+    );
   };
 
   return (

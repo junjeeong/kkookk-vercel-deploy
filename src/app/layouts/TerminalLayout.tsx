@@ -5,7 +5,13 @@
  */
 
 import { TerminalSidebar } from "@/features/terminal/components/TerminalSidebar";
-import { MOCK_REQUESTS } from "@/lib/constants/mockData";
+import {
+  usePendingIssuanceRequests,
+  useApproveIssuance,
+  useRejectIssuance,
+} from "@/features/terminal/hooks/useTerminal";
+import { useStorePublicInfo } from "@/hooks/useStorePublicInfo";
+import { useAuth } from "@/app/providers/AuthProvider";
 import type { IssuanceRequest, StoreStatus } from "@/types/domain";
 import { useCallback, useState } from "react";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
@@ -13,34 +19,90 @@ import { Outlet, useNavigate, useParams } from "react-router-dom";
 export function TerminalLayout() {
   const navigate = useNavigate();
   const { storeId } = useParams<{ storeId: string }>();
+  const { logout } = useAuth();
   const [storeStatus, setStoreStatus] = useState<StoreStatus>("OPEN");
-  const [requests, setRequests] = useState<IssuanceRequest[]>(MOCK_REQUESTS);
+  const [processedHistory, setProcessedHistory] = useState<IssuanceRequest[]>(
+    []
+  );
+
+  const storeIdNum = Number(storeId) || 0;
+
+  // API Hooks
+  const { data: storeInfo } = useStorePublicInfo(
+    storeIdNum > 0 ? storeIdNum : undefined
+  );
+  const {
+    data: pendingData,
+    isLoading,
+    error,
+  } = usePendingIssuanceRequests(storeIdNum > 0 ? storeIdNum : undefined);
+  const approveIssuance = useApproveIssuance();
+  const rejectIssuance = useRejectIssuance();
 
   // pendingCount 계산
-  const pendingCount = requests.filter((r) => r.status === "pending").length;
+  const pendingCount = pendingData?.count ?? 0;
 
-  // TODO: storeId로 매장 정보 조회
-  const storeName = storeId === "demo" ? "카페 루나" : `매장 ${storeId}`;
+  // 매장 이름
+  const storeName = storeInfo?.storeName ?? `매장 ${storeId}`;
+
+  // 요청 목록 변환 (API 응답을 컴포넌트 형식으로)
+  const requests: IssuanceRequest[] = (pendingData?.items ?? []).map(
+    (item) => ({
+      id: String(item.id),
+      type: "stamp" as const,
+      user: item.customerName,
+      phone: "",
+      count: 1,
+      time: new Date(item.requestedAt),
+      status: "pending" as const,
+      store: storeName,
+    })
+  );
 
   const handleLogout = useCallback(() => {
+    logout();
     navigate("/simulation");
-  }, [navigate]);
+  }, [logout, navigate]);
 
-  const approve = useCallback((id: string) => {
-    setRequests((prev) =>
-      prev.map((r) =>
-        r.id === id ? { ...r, status: "approved" as const } : r,
-      ),
-    );
-  }, []);
+  const approve = useCallback(
+    (id: string) => {
+      const request = requests.find((r) => r.id === id);
+      approveIssuance.mutate(
+        { storeId: storeIdNum, requestId: Number(id) },
+        {
+          onSuccess: () => {
+            if (request) {
+              setProcessedHistory((prev) => [
+                { ...request, status: "approved" as const, time: new Date() },
+                ...prev,
+              ]);
+            }
+          },
+        }
+      );
+    },
+    [approveIssuance, storeIdNum, requests]
+  );
 
-  const reject = useCallback((id: string) => {
-    setRequests((prev) =>
-      prev.map((r) =>
-        r.id === id ? { ...r, status: "rejected" as const } : r,
-      ),
-    );
-  }, []);
+  const reject = useCallback(
+    (id: string) => {
+      const request = requests.find((r) => r.id === id);
+      rejectIssuance.mutate(
+        { storeId: storeIdNum, requestId: Number(id) },
+        {
+          onSuccess: () => {
+            if (request) {
+              setProcessedHistory((prev) => [
+                { ...request, status: "rejected" as const, time: new Date() },
+                ...prev,
+              ]);
+            }
+          },
+        }
+      );
+    },
+    [rejectIssuance, storeIdNum, requests]
+  );
 
   const toggleStoreStatus = useCallback(() => {
     setStoreStatus((prev) => (prev === "OPEN" ? "CLOSED" : "OPEN"));
@@ -61,6 +123,9 @@ export function TerminalLayout() {
               requests,
               approve,
               reject,
+              processedHistory,
+              isLoading,
+              error,
               storeStatus,
               toggleStoreStatus,
             }}

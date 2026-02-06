@@ -8,13 +8,13 @@ import { useOutletContext } from "react-router-dom";
 import type { IssuanceRequest } from "@/types/domain";
 
 interface TerminalContextType {
-  requests: IssuanceRequest[];
+  processedHistory: IssuanceRequest[];
 }
 
 export function TerminalHistoryPage() {
-  const { requests } = useOutletContext<TerminalContextType>();
+  const { processedHistory } = useOutletContext<TerminalContextType>();
 
-  return <ProcessedHistory requests={requests} />;
+  return <ProcessedHistory requests={processedHistory} />;
 }
 
 export default TerminalHistoryPage;

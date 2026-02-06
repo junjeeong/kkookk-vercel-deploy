@@ -4,40 +4,51 @@
  */
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { useNavigate } from 'react-router-dom';
+import { useCustomerNavigate, saveOriginStoreId } from '@/hooks/useCustomerNavigate';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { useWalletLogin } from '@/features/auth/hooks/useAuth';
 
-interface CustomerLoginFormProps {
-  isLoading?: boolean;
-}
-
-export function CustomerLoginForm({
-  isLoading = false,
-}: CustomerLoginFormProps) {
+export function CustomerLoginForm() {
   const navigate = useNavigate();
+  const { storeId, customerNavigate } = useCustomerNavigate();
+  const { refreshAuthState } = useAuth();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  // 두 필드가 모두 입력되었는지 확인
-  const isFormValid = name.trim() !== '' && phone.trim() !== '';
+  const loginMutation = useWalletLogin();
+
+  const isFormValid = name.trim() !== '' && phone.trim() !== '' && !!storeId;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !phone) {
-      alert('이름과 휴대폰 번호를 입력해주세요.');
-      return;
-    }
-    // TODO: API 연동 후 실제 로그인 처리
-    navigate('/customer/wallet');
+    setError(null);
+    if (!isFormValid) return;
+
+    loginMutation.mutate(
+      { phone, name, storeId: Number(storeId) },
+      {
+        onSuccess: () => {
+          if (storeId) saveOriginStoreId(storeId);
+          refreshAuthState();
+          navigate('/customer/wallet');
+        },
+        onError: () => {
+          setError('존재하지 않는 지갑입니다. 회원가입을 먼저 해주세요.');
+        },
+      }
+    );
   };
 
   return (
     <div className="h-full p-6 pt-12 flex flex-col bg-white">
       <div className="flex items-center mb-6 -ml-2">
         <button
-          onClick={() => navigate('/customer')}
+          onClick={() => customerNavigate('/')}
           className="p-2 text-kkookk-steel"
           aria-label="뒤로 가기"
         >
@@ -73,12 +84,16 @@ export function CustomerLoginForm({
           autoComplete="tel"
         />
 
+        {error && (
+          <p className="text-sm text-red-500">{error}</p>
+        )}
+
         <Button
           type="submit"
           variant="primary"
           size="full"
-          isLoading={isLoading}
-          disabled={!isFormValid}
+          isLoading={loginMutation.isPending}
+          disabled={!isFormValid || loginMutation.isPending}
           className="mt-4"
         >
           지갑 열기

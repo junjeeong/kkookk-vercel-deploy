@@ -11,6 +11,7 @@ export type StampCardStatus = 'draft' | 'active' | 'paused' | 'archived';
 
 export interface StampCard {
   id: string;
+  storeId?: number;
   storeName: string;
   current: number;
   max: number;
@@ -19,6 +20,9 @@ export interface StampCard {
   status: StampCardStatus;
   bgGradient?: string;
   shadowColor?: string;
+  stampColor?: string;
+  backgroundImage?: string | null;
+  stampImage?: string | null;
   expiryDays?: number;
 }
 
@@ -37,11 +41,11 @@ export interface AdminStampCard {
 export interface Reward {
   id: string;
   storeName: string;
+  stampCardTitle: string;
   name: string;
   expiry: string;
   isUsed: boolean;
-  theme: StampCardTheme;
-  gradient: string;
+  designJson: string | null;
 }
 
 // =============================================================================

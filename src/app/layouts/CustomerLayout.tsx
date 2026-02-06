@@ -1,37 +1,52 @@
 /**
  * CustomerLayout
  * 고객 PWA 라우트용 레이아웃 래퍼
+ *
+ * Pre-login: /stores/:storeId/customer/* (URL storeId)
+ * Post-login: /customer/* (sessionStorage storeId)
  */
 
 import { useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { MobileFrame } from '@/components/layout/MobileFrame';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { clearOriginStoreId } from '@/hooks/useCustomerNavigate';
 
 export function CustomerLayout() {
   const navigate = useNavigate();
+  const { storeId: urlStoreId } = useParams<{ storeId: string }>();
+  const { logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentStoreId, setCurrentStoreId] = useState<number | undefined>(undefined);
+
+  // Pre-login: /stores/:storeId/customer, Post-login: /customer
+  const base = urlStoreId ? `/stores/${urlStoreId}/customer` : '/customer';
 
   const handleMenuItemClick = (screen: string) => {
     setIsMenuOpen(false);
     switch (screen) {
-      case 'history':
-        navigate('/customer/history');
+      case 'history': {
+        const query = currentStoreId ? `?storeId=${currentStoreId}` : '';
+        navigate(`${base}/history${query}`);
         break;
+      }
       case 'rewardBox':
-        navigate('/customer/redeems');
+        navigate(`${base}/redeems`);
         break;
       case 'migrationList':
-        navigate('/customer/migrations');
+        navigate(`${base}/migrations`);
         break;
       case 'settings':
-        navigate('/customer/settings');
+        navigate(`${base}/settings`);
         break;
       default:
-        navigate('/customer/wallet');
+        navigate(`${base}/wallet`);
     }
   };
 
   const handleLogout = () => {
+    clearOriginStoreId();
+    logout();
     navigate('/');
   };
 
@@ -42,7 +57,7 @@ export function CustomerLayout() {
       onMenuItemClick={handleMenuItemClick}
       onLogout={handleLogout}
     >
-      <Outlet context={{ setIsMenuOpen }} />
+      <Outlet context={{ setIsMenuOpen, setCurrentStoreId }} />
     </MobileFrame>
   );
 }

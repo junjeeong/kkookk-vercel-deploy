@@ -4,6 +4,7 @@
  */
 
 export { TerminalLoginPage } from "./TerminalLoginPage";
+export { TerminalStoreSelectPage } from "./TerminalStoreSelectPage";
 export { TerminalApprovalPage } from "./TerminalApprovalPage";
 export { TerminalHistoryPage } from "./TerminalHistoryPage";
 export { TerminalSettingsPage } from "./TerminalSettingsPage";

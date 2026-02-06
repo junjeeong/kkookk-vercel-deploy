@@ -51,8 +51,8 @@ export function MobileFrame({
         {/* 슬라이드 아웃 메뉴 */}
         <div
           className={cn(
-            "absolute inset-0 z-50 flex justify-end pointer-events-none",
-            isMenuOpen && "pointer-events-auto"
+            "absolute inset-0 z-50 flex justify-end transition-opacity duration-200",
+            isMenuOpen ? "pointer-events-auto" : "opacity-0 pointer-events-none"
           )}
         >
           {/* 배경 오버레이 */}
@@ -61,8 +61,8 @@ export function MobileFrame({
             tabIndex={0}
             aria-label="메뉴 닫기"
             className={cn(
-              "absolute inset-0 bg-kkookk-navy/20 backdrop-blur-sm transition-opacity duration-200",
-              isMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+              "absolute inset-0 transition-all duration-200",
+              isMenuOpen ? "bg-kkookk-navy/20 backdrop-blur-sm" : "bg-transparent"
             )}
             onClick={onMenuClose}
             onKeyDown={(e) => {

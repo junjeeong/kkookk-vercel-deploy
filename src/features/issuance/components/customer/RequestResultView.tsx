@@ -8,13 +8,15 @@ import { Button } from '@/components/ui/Button';
 
 interface RequestResultViewProps {
   success: boolean;
-  stampCount: number;
+  stampCount?: number;
+  message?: string;
   onConfirm: () => void;
 }
 
 export function RequestResultView({
   success,
   stampCount,
+  message,
   onConfirm,
 }: RequestResultViewProps) {
   return (
@@ -32,11 +34,11 @@ export function RequestResultView({
       </h2>
 
       <p className="text-kkookk-steel mb-8">
-        {success ? `지금 ${stampCount}개예요` : '매장에 문의해주세요'}
+        {message ?? (success ? (stampCount ? `지금 ${stampCount}개예요` : '스탬프가 적립되었습니다') : '매장에 문의해주세요')}
       </p>
 
       <Button onClick={onConfirm} variant="subtle" size="full">
-        {success ? '확인' : '다시 시도하기'}
+        {success ? '확인' : '돌아가기'}
       </Button>
     </div>
   );

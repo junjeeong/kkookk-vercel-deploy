@@ -9,4 +9,5 @@ export * from './StoreDetailPage';
 export * from './StoreHistoryPage';
 export * from './StoreMigrationsPage';
 export * from './StampCardCreatePage';
+export * from './StampCardEditPage';
 export * from './StampCardStatsPage';

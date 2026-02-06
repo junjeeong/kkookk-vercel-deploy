@@ -3,12 +3,16 @@
  * 매장용 QR 포스터 표시 및 다운로드 모달
  */
 
-import { QrCode, Smartphone, Check, Download, X } from 'lucide-react';
+import { useState } from 'react';
+import { QrCode, Smartphone, Check, Download, X, Loader2, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 interface QRPosterModalProps {
   isOpen: boolean;
   storeName: string;
+  storeId?: number;
+  qrCodeBase64?: string;
+  isLoading?: boolean;
   onClose: () => void;
   onDownload: () => void;
 }
@@ -16,10 +20,35 @@ interface QRPosterModalProps {
 export function QRPosterModal({
   isOpen,
   storeName,
+  storeId,
+  qrCodeBase64,
+  isLoading,
   onClose,
   onDownload,
 }: QRPosterModalProps) {
+  const [copied, setCopied] = useState(false);
+
   if (!isOpen) return null;
+
+  const handleCopyLink = async () => {
+    if (!storeId) return;
+    const link = `${window.location.origin}/stores/${storeId}/customer`;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback for browsers that don't support clipboard API
+      const textarea = document.createElement('textarea');
+      textarea.value = link;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -64,8 +93,18 @@ export function QRPosterModal({
               스탬프 적립 & 리워드 사용
             </p>
 
-            <div className="bg-kkookk-navy p-4 rounded-xl mb-6">
-              <QrCode size={120} className="text-white" />
+            <div className="bg-kkookk-navy p-4 rounded-xl mb-6 min-w-[152px] min-h-[152px] flex items-center justify-center">
+              {isLoading ? (
+                <Loader2 size={48} className="text-white animate-spin" />
+              ) : qrCodeBase64 ? (
+                <img
+                  src={`data:image/png;base64,${qrCodeBase64}`}
+                  alt={`${storeName} QR 코드`}
+                  className="w-[120px] h-[120px]"
+                />
+              ) : (
+                <QrCode size={120} className="text-white" />
+              )}
             </div>
 
             <div className="flex items-center gap-2 text-kkookk-navy font-bold text-sm bg-slate-100 px-4 py-2 rounded-full">
@@ -81,14 +120,26 @@ export function QRPosterModal({
             <Check size={14} className="text-green-500" /> 프린트 후 매장에
             배치해주세요
           </p>
-          <Button
-            onClick={onDownload}
-            variant="navy"
-            size="full"
-            className="shadow-lg shadow-kkookk-navy/20"
-          >
-            <Download size={20} /> 이미지로 저장하기
-          </Button>
+          <div className="space-y-2">
+            <Button
+              onClick={onDownload}
+              variant="navy"
+              size="full"
+              className="shadow-lg shadow-kkookk-navy/20"
+            >
+              <Download size={20} /> 이미지로 저장하기
+            </Button>
+            {storeId && (
+              <Button
+                onClick={handleCopyLink}
+                variant="subtle"
+                size="full"
+              >
+                <Link2 size={18} />
+                {copied ? '복사 완료!' : 'QR 링크 복사하기'}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>

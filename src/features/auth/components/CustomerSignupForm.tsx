@@ -5,44 +5,93 @@
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { useNavigate } from "react-router-dom";
+import { useCustomerNavigate, saveOriginStoreId } from "@/hooks/useCustomerNavigate";
+import { useAuth } from "@/app/providers/AuthProvider";
+import { useOtpRequest, useOtpVerify, useWalletRegister } from "@/features/auth/hooks/useAuth";
 import { Check, ChevronLeft, Sparkles } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 type SignupStep = "input" | "otp" | "success";
 
 export function CustomerSignupForm() {
   const navigate = useNavigate();
+  const { storeId, customerNavigate } = useCustomerNavigate();
+  const { refreshAuthState } = useAuth();
   const [step, setStep] = useState<SignupStep>("input");
   const [name, setName] = useState("");
   const [nickname, setNickname] = useState("");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const otpRequest = useOtpRequest();
+  const otpVerify = useOtpVerify();
+  const walletRegister = useWalletRegister();
 
   // 폼 유효성 검사
   const isBasicInfoValid =
     name.trim() !== "" && nickname.trim() !== "" && phone.trim() !== "";
-  const isOtpValid = otp.trim() !== "";
+  const isOtpValid = otp.trim().length === 6;
 
   const handleRequestOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !nickname || !phone) {
-      alert("모든 정보를 입력해주세요.");
-      return;
-    }
-    // OTP 요청 시뮬레이션
-    setStep("otp");
+    if (!isBasicInfoValid) return;
+    setError(null);
+
+    otpRequest.mutate(
+      { phone },
+      {
+        onSuccess: (response) => {
+          setStep("otp");
+          // Dev convenience: auto-fill OTP code in dev mode
+          if (response.devOtpCode) {
+            setOtp(response.devOtpCode);
+          }
+        },
+        onError: () => {
+          setError("1분 후 다시 시도해주세요.");
+        },
+      }
+    );
   };
 
   const handleVerifyOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!otp) {
-      alert("인증번호를 입력해주세요.");
-      return;
-    }
-    // 인증 시뮬레이션
-    setStep("success");
+    if (!otp) return;
+    setError(null);
+
+    otpVerify.mutate(
+      { phone, code: otp },
+      {
+        onSuccess: (response) => {
+          if (!response.verified) {
+            setError("인증번호가 올바르지 않습니다.");
+            return;
+          }
+          // OTP verified → register wallet
+          walletRegister.mutate(
+            { phone, name, nickname },
+            {
+              onSuccess: () => {
+                if (storeId) saveOriginStoreId(storeId);
+                refreshAuthState();
+                setStep("success");
+              },
+              onError: () => {
+                setError("이미 등록된 번호입니다.");
+              },
+            }
+          );
+        },
+        onError: () => {
+          setError("인증번호가 올바르지 않습니다.");
+        },
+      }
+    );
   };
+
+  const isVerifying = otpVerify.isPending || walletRegister.isPending;
 
   if (step === "success") {
     return (
@@ -81,9 +130,15 @@ export function CustomerSignupForm() {
     <div className="flex flex-col h-full p-6 pt-12 bg-white">
       <div className="flex items-center mb-6 -ml-2">
         <button
-          onClick={() =>
-            step === "otp" ? setStep("input") : navigate("/customer")
-          }
+          onClick={() => {
+            setError(null);
+            if (step === "otp") {
+              setStep("input");
+              setOtp("");
+            } else {
+              customerNavigate("/");
+            }
+          }}
           className="p-2 text-kkookk-steel"
           aria-label="뒤로 가기"
         >
@@ -125,11 +180,16 @@ export function CustomerSignupForm() {
             autoComplete="tel"
           />
 
+          {error && (
+            <p className="text-sm text-red-500">{error}</p>
+          )}
+
           <Button
             type="submit"
             variant="primary"
             size="full"
-            disabled={!isBasicInfoValid}
+            disabled={!isBasicInfoValid || otpRequest.isPending}
+            isLoading={otpRequest.isPending}
             className="mt-4"
           >
             인증번호 받기
@@ -156,11 +216,16 @@ export function CustomerSignupForm() {
             autoComplete="one-time-code"
           />
 
+          {error && (
+            <p className="text-sm text-red-500">{error}</p>
+          )}
+
           <Button
             type="submit"
             variant="primary"
             size="full"
-            disabled={!isOtpValid}
+            disabled={!isOtpValid || isVerifying}
+            isLoading={isVerifying}
             className="mt-4"
           >
             인증 완료하고 시작하기

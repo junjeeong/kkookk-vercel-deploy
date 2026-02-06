@@ -24,7 +24,7 @@ export function LauncherPage() {
           icon={<Smartphone size={40} />}
           title="고객용 PWA"
           desc="스탬프 적립, 리워드 확인, 적립 요청"
-          onClick={() => navigate("/customer")}
+          onClick={() => navigate("/customer/stores")}
           color="bg-kkookk-orange-500"
         />
         <LauncherCard

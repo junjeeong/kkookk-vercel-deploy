@@ -3,7 +3,7 @@
  * 처리된 요청 히스토리 테이블
  */
 
-import { formatTime, maskPhone } from '@/lib/utils/format';
+import { formatTime } from '@/lib/utils/format';
 import { Badge } from '@/components/ui/Badge';
 import type { IssuanceRequest } from '@/types/domain';
 
@@ -12,9 +12,11 @@ interface ProcessedHistoryProps {
 }
 
 export function ProcessedHistory({ requests }: ProcessedHistoryProps) {
-  const historyRequests = requests
-    .filter((r) => r.status !== 'pending')
-    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+  // 이미 approved/rejected 상태만 전달되므로 추가 필터 불필요
+  // 최신순 정렬
+  const sorted = [...requests].sort(
+    (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
+  );
 
   return (
     <>
@@ -27,30 +29,25 @@ export function ProcessedHistory({ requests }: ProcessedHistoryProps) {
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="p-4 text-xs font-bold text-kkookk-steel">시간</th>
-                <th className="p-4 text-xs font-bold text-kkookk-steel">
-                  닉네임
-                </th>
-                <th className="p-4 text-xs font-bold text-kkookk-steel">
-                  전화번호
-                </th>
+                <th className="p-4 text-xs font-bold text-kkookk-steel">고객명</th>
                 <th className="p-4 text-xs font-bold text-kkookk-steel">내용</th>
                 <th className="p-4 text-xs font-bold text-kkookk-steel">결과</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {historyRequests.length === 0 ? (
+              {sorted.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={4}
                     className="p-8 text-center text-kkookk-steel text-sm"
                   >
                     처리된 내역이 없습니다.
                   </td>
                 </tr>
               ) : (
-                historyRequests.map((req) => (
+                sorted.map((req) => (
                   <tr
-                    key={req.id}
+                    key={`${req.id}-${req.status}`}
                     className="hover:bg-slate-50 transition-colors"
                   >
                     <td className="p-4 text-sm text-kkookk-navy font-mono">
@@ -58,9 +55,6 @@ export function ProcessedHistory({ requests }: ProcessedHistoryProps) {
                     </td>
                     <td className="p-4 text-sm text-kkookk-navy font-bold">
                       {req.user}
-                    </td>
-                    <td className="p-4 text-sm text-kkookk-steel font-mono">
-                      {maskPhone(req.phone)}
                     </td>
                     <td className="p-4 text-sm text-kkookk-navy">
                       {req.type === 'stamp'

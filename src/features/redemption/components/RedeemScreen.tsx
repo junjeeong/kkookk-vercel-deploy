@@ -4,40 +4,57 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { TestTube } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
+import { useCustomerNavigate } from '@/hooks/useCustomerNavigate';
 import { TTLCountdown } from './TTLCountdown';
 import { StaffConfirmModal } from './StaffConfirmModal';
+import { RedeemResultView } from './RedeemResultView';
 import { Button } from '@/components/ui/Button';
-import { REDEEM_TTL_SECONDS } from '../types';
+import { useCreateRedeemSession, useCompleteRedeemSession } from '../hooks/useRedeem';
 
-interface RedeemScreenProps {
-  showDevControls?: boolean;
-}
+type RedeemState = 'loading' | 'confirming' | 'completing' | 'success' | 'failed';
 
-export function RedeemScreen({
-  showDevControls = true,
-}: RedeemScreenProps) {
-  const navigate = useNavigate();
+export function RedeemScreen() {
+  const { customerNavigate } = useCustomerNavigate();
   const { redeemId } = useParams<{ redeemId: string }>();
 
-  const handleComplete = useCallback((success: boolean) => {
-    // TODO: API 연동 후 실제 처리
-    console.log('Redeem completed:', redeemId, success);
-    navigate('/customer/redeems');
-  }, [navigate, redeemId]);
+  const [redeemState, setRedeemState] = useState<RedeemState>('loading');
   const [showStaffConfirm, setShowStaffConfirm] = useState(false);
-  const [remainingSeconds, setRemainingSeconds] = useState(REDEEM_TTL_SECONDS);
-  const [isExpired, setIsExpired] = useState(false);
+  const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [sessionId, setSessionId] = useState<number | null>(null);
+
+  const createSession = useCreateRedeemSession();
+  const completeSession = useCompleteRedeemSession();
+
+  // 세션 생성 (마운트 시)
+  useEffect(() => {
+    if (!redeemId) return;
+
+    createSession.mutate(
+      { walletRewardId: Number(redeemId) },
+      {
+        onSuccess: (data) => {
+          setSessionId(data.sessionId);
+          setRemainingSeconds(data.remainingSeconds);
+          setRedeemState('confirming');
+        },
+        onError: () => {
+          setRedeemState('failed');
+        },
+      }
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [redeemId]);
 
   // TTL 카운트다운
   useEffect(() => {
-    if (isExpired) return;
+    if (redeemState !== 'confirming') return;
 
     const timer = setInterval(() => {
       setRemainingSeconds((prev) => {
         if (prev <= 1) {
-          setIsExpired(true);
+          setRedeemState('failed');
           clearInterval(timer);
           return 0;
         }
@@ -46,34 +63,58 @@ export function RedeemScreen({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isExpired]);
+  }, [redeemState]);
 
   const handleStaffConfirm = useCallback(() => {
     setShowStaffConfirm(false);
-    handleComplete(true);
-  }, [handleComplete]);
+    if (!sessionId) return;
+
+    setRedeemState('completing');
+    completeSession.mutate(sessionId, {
+      onSuccess: () => {
+        setRedeemState('success');
+      },
+      onError: () => {
+        setRedeemState('failed');
+      },
+    });
+  }, [sessionId, completeSession]);
 
   const handleStaffCancel = useCallback(() => {
     setShowStaffConfirm(false);
   }, []);
 
-  // 만료 상태 표시
-  if (isExpired) {
+  const handleBackToList = useCallback(() => {
+    customerNavigate('/redeems');
+  }, [customerNavigate]);
+
+  // Loading state (세션 생성 중)
+  if (redeemState === 'loading') {
     return (
-      <div className="h-full flex flex-col p-6 justify-center text-center bg-white">
-        <div className="w-20 h-20 bg-red-100 text-kkookk-red rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="text-3xl">⏱️</span>
-        </div>
-        <h2 className="text-2xl font-bold mb-2 text-kkookk-navy">
-          요청이 만료되었습니다
-        </h2>
-        <p className="text-kkookk-steel mb-8">
-          다시 사용하기를 눌러주세요.
-        </p>
-        <Button onClick={() => handleComplete(false)} variant="subtle" size="full">
-          돌아가기
-        </Button>
+      <div className="h-full flex flex-col items-center justify-center bg-red-50">
+        <Loader2 className="w-8 h-8 animate-spin text-kkookk-orange-500" />
+        <p className="mt-4 text-kkookk-steel">리워드 사용 준비 중...</p>
       </div>
+    );
+  }
+
+  // Success state
+  if (redeemState === 'success') {
+    return (
+      <RedeemResultView
+        success={true}
+        onConfirm={handleBackToList}
+      />
+    );
+  }
+
+  // Failed state (including TTL expired)
+  if (redeemState === 'failed') {
+    return (
+      <RedeemResultView
+        success={false}
+        onConfirm={handleBackToList}
+      />
     );
   }
 
@@ -99,9 +140,17 @@ export function RedeemScreen({
               onClick={() => setShowStaffConfirm(true)}
               variant="navy"
               size="full"
+              disabled={redeemState === 'completing'}
               className="animate-pulse text-lg"
             >
-              사용 처리 완료 (직원용)
+              {redeemState === 'completing' ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  처리 중...
+                </span>
+              ) : (
+                '사용 처리 완료 (직원용)'
+              )}
             </Button>
             <p className="text-[10px] text-kkookk-steel mt-3">
               직원이 직접 버튼을 눌러주세요
@@ -109,24 +158,6 @@ export function RedeemScreen({
           </div>
         </div>
       </div>
-
-      {/* 개발자 시뮬레이션 컨트롤 */}
-      {showDevControls && (
-        <div className="bg-white/90 rounded-2xl p-4 mb-8 backdrop-blur-sm border border-slate-200 shadow-lg">
-          <div className="flex items-center justify-center gap-2 mb-3 text-kkookk-steel text-xs font-medium">
-            <TestTube size={14} />
-            <span>Developer Simulation Mode</span>
-          </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => handleComplete(false)}
-              className="w-full py-3 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-bold rounded-xl border border-red-200 transition-colors"
-            >
-              거절 시나리오 (테스트용)
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* 직원 확인 모달 (PRD에 따른 2단계 확인) */}
       <StaffConfirmModal

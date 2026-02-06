@@ -4,11 +4,14 @@
  */
 
 import { Link, Outlet, useNavigate } from "react-router-dom";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 export function OwnerLayout() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
+    logout();
     navigate("/simulation");
   };
 

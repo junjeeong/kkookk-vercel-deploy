@@ -11,12 +11,14 @@ import { StampCardItem } from "./StampCardItem";
 interface StampCardCarouselProps {
   cards: StampCard[];
   onCardSelect: (card: StampCard) => void;
+  onCardChange?: (card: StampCard) => void;
   className?: string;
 }
 
 export function StampCardCarousel({
   cards,
   onCardSelect,
+  onCardChange,
   className,
 }: StampCardCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -28,10 +30,13 @@ export function StampCardCarousel({
       const scrollLeft = target.scrollLeft;
       const width = target.offsetWidth;
       const cardWidth = width * 0.85;
-      const index = Math.round(scrollLeft / cardWidth);
-      setCurrentIndex(Math.min(Math.max(index, 0), cards.length - 1));
+      const index = Math.min(Math.max(Math.round(scrollLeft / cardWidth), 0), cards.length - 1);
+      if (index !== currentIndex) {
+        setCurrentIndex(index);
+        onCardChange?.(cards[index]);
+      }
     },
-    [cards.length],
+    [cards, currentIndex, onCardChange],
   );
 
   return (

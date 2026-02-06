@@ -3,45 +3,118 @@
  * 매장 적립/사용 이력 페이지
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, MapPin } from 'lucide-react';
+import { ChevronLeft, MapPin, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { formatDateTime, maskPhone } from '@/lib/utils/format';
-import { MOCK_REQUESTS, MOCK_STORES, MOCK_MIGRATIONS } from '@/lib/constants/mockData';
-import type { IssuanceRequest } from '@/types/domain';
+import { MOCK_REQUESTS } from '@/lib/constants/mockData';
+import { useStore } from '@/features/store-management/hooks/useStore';
+import { useRedeemEventsInfinite } from '@/features/store-management/hooks/useStore';
 
 type HistoryFilter = 'all' | 'stamp' | 'reward';
 
-interface StoreHistoryPageProps {
-  requests?: IssuanceRequest[];
+// Combined history item type
+interface HistoryItem {
+  id: string | number;
+  time: Date | string;
+  user: string;
+  phone: string;
+  type: 'stamp' | 'reward';
+  count?: number;
+  content: string;
 }
 
-export function StoreHistoryPage({ requests = MOCK_REQUESTS }: StoreHistoryPageProps) {
+export function StoreHistoryPage() {
   const navigate = useNavigate();
   const { storeId } = useParams<{ storeId: string }>();
   const [historyFilter, setHistoryFilter] = useState<HistoryFilter>('all');
 
-  const store = MOCK_STORES.find((s) => s.id === Number(storeId));
-  const pendingMigrations = MOCK_MIGRATIONS.filter(
-    (m) => m.storeName === store?.name && m.status === 'pending'
-  );
+  const storeIdNum = Number(storeId);
 
-  if (!store) {
+  // API Hooks
+  const { data: store, isLoading: storeLoading, error: storeError } = useStore(storeIdNum);
+  const {
+    data: redeemEventsData,
+    isLoading: redeemLoading,
+    refetch: refetchRedeemEvents,
+    isFetching: isRefreshing,
+  } = useRedeemEventsInfinite(storeIdNum);
+
+  const handleRefresh = () => {
+    refetchRedeemEvents();
+  };
+
+  const handleFilterChange = (filter: HistoryFilter) => {
+    setHistoryFilter(filter);
+    // "전체" 또는 "리워드 사용" 탭 클릭 시 최신 데이터 fetch
+    if (filter === 'all' || filter === 'reward') {
+      refetchRedeemEvents();
+    }
+  };
+
+  // Loading state
+  if (storeLoading) {
     return (
-      <div className="p-8 text-center">
-        <p className="text-kkookk-steel">매장을 찾을 수 없습니다.</p>
+      <div className="flex flex-col items-center justify-center p-8 min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-kkookk-indigo" />
+        <p className="mt-4 text-kkookk-steel">매장 정보를 불러오는 중...</p>
       </div>
     );
   }
 
-  const filteredRequests = requests
-    .filter((req) => req.store === store.name)
-    .filter((req) => req.status !== 'pending')
-    .filter((req) => {
-      if (historyFilter === 'all') return true;
-      return req.type === historyFilter;
-    })
-    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+  // Error or not found state
+  if (storeError || !store) {
+    return (
+      <div className="p-8 text-center">
+        <AlertCircle className="w-12 h-12 mx-auto text-red-500" />
+        <p className="mt-4 text-kkookk-steel">매장을 찾을 수 없습니다.</p>
+        <button
+          onClick={() => navigate('/owner/stores')}
+          className="mt-4 px-4 py-2 border border-slate-200 rounded-lg text-kkookk-navy font-bold hover:bg-slate-50"
+        >
+          매장 목록으로
+        </button>
+      </div>
+    );
+  }
+
+  // Combine stamp (mock) and reward (API) data
+  const combinedHistory = useMemo<HistoryItem[]>(() => {
+    const stampHistory: HistoryItem[] = MOCK_REQUESTS
+      .filter((req) => req.store === store.name && req.status !== 'pending' && req.type === 'stamp')
+      .map((req) => ({
+        id: req.id,
+        time: req.time,
+        user: req.user,
+        phone: req.phone,
+        type: 'stamp' as const,
+        count: req.count,
+        content: `+${req.count}`,
+      }));
+
+    const rewardHistory: HistoryItem[] = redeemEventsData?.pages.flatMap((page) =>
+      page.content
+        .filter((event) => event.type === 'COMPLETED' && event.result === 'SUCCESS')
+        .map((event) => ({
+          id: event.id,
+          time: event.occurredAt,
+          user: event.customerNickname,
+          phone: '010-****-****', // API doesn't provide phone number
+          type: 'reward' as const,
+          content: event.rewardName || '쿠폰 사용',
+        }))
+    ) ?? [];
+
+    return [...stampHistory, ...rewardHistory].sort(
+      (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
+    );
+  }, [redeemEventsData, store.name]);
+
+  // Filter history based on selected tab
+  const filteredHistory = combinedHistory.filter((item) => {
+    if (historyFilter === 'all') return true;
+    return item.type === historyFilter;
+  });
 
   return (
     <div className="flex flex-col h-full">
@@ -78,25 +151,33 @@ export function StoreHistoryPage({ requests = MOCK_REQUESTS }: StoreHistoryPageP
             className="px-4 py-2 rounded-lg font-bold text-sm transition-colors text-kkookk-steel hover:bg-slate-50"
           >
             전환 신청 관리
-            {pendingMigrations.length > 0 && (
-              <span className="ml-1.5 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-                N
-              </span>
-            )}
           </button>
         </div>
       </div>
 
       {/* 컨텐츠 */}
-      <div className="flex-1 overflow-y-auto p-8">
-        <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-8 h-full flex flex-col">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-kkookk-navy">적립/사용 내역</h3>
+            <div className="flex items-center gap-3">
+              <h3 className="text-xl font-bold text-kkookk-navy">적립/사용 내역</h3>
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="p-2 text-kkookk-steel hover:text-kkookk-navy hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+                title="새로고침"
+              >
+                <RefreshCw
+                  size={18}
+                  className={isRefreshing ? 'animate-spin' : ''}
+                />
+              </button>
+            </div>
             <div className="flex bg-white border border-slate-200 rounded-lg p-1">
               {(['all', 'stamp', 'reward'] as const).map((filter) => (
                 <button
                   key={filter}
-                  onClick={() => setHistoryFilter(filter)}
+                  onClick={() => handleFilterChange(filter)}
                   className={`px-4 py-2 rounded-md text-sm font-bold transition-colors ${
                     historyFilter === filter
                       ? 'bg-kkookk-navy text-white'
@@ -133,45 +214,55 @@ export function StoreHistoryPage({ requests = MOCK_REQUESTS }: StoreHistoryPageP
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredRequests.map((req) => (
-                  <tr
-                    key={req.id}
-                    className="hover:bg-slate-50 transition-colors"
-                  >
-                    <td className="p-4 pl-6 text-sm text-kkookk-steel font-mono">
-                      {formatDateTime(req.time)}
-                    </td>
-                    <td className="p-4 text-sm font-bold text-kkookk-navy">
-                      {req.user}
-                    </td>
-                    <td className="p-4 text-sm text-kkookk-steel font-mono">
-                      {maskPhone(req.phone)}
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className={`text-xs font-bold px-2 py-1 rounded ${
-                          req.type === 'stamp'
-                            ? 'bg-blue-50 text-kkookk-indigo'
-                            : 'bg-purple-100 text-purple-700'
-                        }`}
-                      >
-                        {req.type === 'stamp' ? '적립' : '사용'}
-                      </span>
-                    </td>
-                    <td className="p-4 text-sm text-right pr-6 font-bold text-kkookk-navy">
-                      {req.type === 'stamp' ? `+${req.count}` : '쿠폰 사용'}
-                    </td>
-                  </tr>
-                ))}
-                {filteredRequests.length === 0 && (
+                {redeemLoading && historyFilter !== 'stamp' ? (
                   <tr>
-                    <td
-                      colSpan={5}
-                      className="p-12 text-center text-kkookk-steel"
-                    >
-                      해당하는 내역이 없습니다.
+                    <td colSpan={5} className="p-12 text-center">
+                      <Loader2 className="w-6 h-6 animate-spin text-kkookk-indigo mx-auto" />
                     </td>
                   </tr>
+                ) : (
+                  <>
+                    {filteredHistory.map((item) => (
+                      <tr
+                        key={item.id}
+                        className="hover:bg-slate-50 transition-colors"
+                      >
+                        <td className="p-4 pl-6 text-sm text-kkookk-steel font-mono">
+                          {formatDateTime(item.time)}
+                        </td>
+                        <td className="p-4 text-sm font-bold text-kkookk-navy">
+                          {item.user}
+                        </td>
+                        <td className="p-4 text-sm text-kkookk-steel font-mono">
+                          {maskPhone(item.phone)}
+                        </td>
+                        <td className="p-4">
+                          <span
+                            className={`text-xs font-bold px-2 py-1 rounded ${
+                              item.type === 'stamp'
+                                ? 'bg-blue-50 text-kkookk-indigo'
+                                : 'bg-purple-100 text-purple-700'
+                            }`}
+                          >
+                            {item.type === 'stamp' ? '적립' : '사용'}
+                          </span>
+                        </td>
+                        <td className="p-4 text-sm text-right pr-6 font-bold text-kkookk-navy">
+                          {item.content}
+                        </td>
+                      </tr>
+                    ))}
+                    {filteredHistory.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          className="p-12 text-center text-kkookk-steel"
+                        >
+                          해당하는 내역이 없습니다.
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 )}
               </tbody>
             </table>

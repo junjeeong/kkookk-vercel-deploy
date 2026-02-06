@@ -20,6 +20,7 @@ export function StampCardItem({
   onClick,
   className,
 }: StampCardItemProps) {
+  const hasBackgroundImage = !!card.backgroundImage;
   const bgGradient =
     card.bgGradient || 'from-[var(--color-kkookk-orange-500)] to-[#E04F00]';
   const shadowColor = card.shadowColor || 'shadow-orange-200';
@@ -28,21 +29,39 @@ export function StampCardItem({
     <div
       onClick={onClick}
       className={cn(
-        'w-full aspect-[1.58/1] bg-gradient-to-br rounded-2xl p-6 text-white',
+        'w-full aspect-[1.58/1] rounded-2xl p-6 text-white',
         'shadow-xl cursor-pointer flex flex-col justify-between relative overflow-hidden',
         'transition-all duration-300',
-        bgGradient,
+        !hasBackgroundImage && 'bg-gradient-to-br',
+        !hasBackgroundImage && bgGradient,
         shadowColor,
         !isActive && 'opacity-70 scale-95',
         className
       )}
+      style={
+        hasBackgroundImage
+          ? {
+              backgroundImage: `url(${card.backgroundImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }
+          : undefined
+      }
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onClick?.()}
     >
+      {/* 이미지형 오버레이 */}
+      {hasBackgroundImage && (
+        <div className="absolute inset-0 bg-black/20" />
+      )}
+
       {/* 헤더 */}
       <div className="flex justify-between items-start z-10">
-        <span className="font-bold text-lg opacity-90 text-white drop-shadow-md tracking-tight">
+        <span className={cn(
+          'font-bold text-lg opacity-90 tracking-tight',
+          hasBackgroundImage ? 'text-white drop-shadow-lg' : 'text-white drop-shadow-md'
+        )}>
           {card.storeName}
         </span>
         <span className="bg-white/20 px-2 py-1 rounded text-xs backdrop-blur-sm font-medium">
@@ -50,20 +69,28 @@ export function StampCardItem({
         </span>
       </div>
 
-      {/* 배경 아이콘 */}
-      <img
-        src="/image/cat_pace.png"
-        alt="Background"
-        className="absolute -right-12 -bottom-12 opacity-10 w-64 h-64 object-cover transform -rotate-12"
-      />
+      {/* 배경 아이콘 (COLOR 타입만) */}
+      {!hasBackgroundImage && (
+        <img
+          src="/image/cat_pace.png"
+          alt="Background"
+          className="absolute -right-12 -bottom-12 opacity-10 w-64 h-64 object-cover transform -rotate-12"
+        />
+      )}
 
       {/* 푸터 */}
       <div className="flex justify-between items-end z-10">
         <div>
-          <p className="text-white/80 text-[10px] font-medium mb-0.5 ml-0.5">
+          <p className={cn(
+            'text-[10px] font-medium mb-0.5 ml-0.5',
+            hasBackgroundImage ? 'text-white/90 drop-shadow-sm' : 'text-white/80'
+          )}>
             현재 스탬프
           </p>
-          <p className="text-3xl font-bold text-white drop-shadow-sm leading-none">
+          <p className={cn(
+            'text-3xl font-bold leading-none',
+            hasBackgroundImage ? 'text-white drop-shadow-lg' : 'text-white drop-shadow-sm'
+          )}>
             {card.current}개
           </p>
         </div>
