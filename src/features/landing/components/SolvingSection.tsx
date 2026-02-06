@@ -433,6 +433,28 @@ export function SolvingSection() {
       {/* Decorative Elements */}
       <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10 bg-kkookk-indigo blur-3xl -z-10" />
       <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-10 bg-kkookk-indigo blur-3xl -z-10" />
+
+      {/* Wave Divider for smooth transition to next section */}
+      <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none">
+        <svg
+          className="relative block w-full h-16 md:h-24"
+          viewBox="0 0 1200 120"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {/* Gradient definition for smooth color transition */}
+          <defs>
+            <linearGradient id="waveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="rgb(249, 250, 251)" stopOpacity="0" />
+              <stop offset="100%" stopColor="rgb(255, 255, 255)" stopOpacity="1" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M0,0 C150,60 350,0 600,40 C850,80 1050,20 1200,50 L1200,120 L0,120 Z"
+            fill="url(#waveGradient)"
+          />
+        </svg>
+      </div>
     </section>
   );
 }

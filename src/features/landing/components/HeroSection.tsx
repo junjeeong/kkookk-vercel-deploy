@@ -19,7 +19,7 @@ export function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative flex flex-col justify-between min-h-screen pt-20 overflow-hidden snap-start snap-always md:justify-center"
+      className="relative flex flex-col justify-between min-h-screen pt-12 overflow-hidden md:pt-20 snap-start snap-always md:justify-center"
       style={{
         background:
           "radial-gradient(ellipse 120% 80% at 50% 0%, #FFF7ED 0%, #FFFBF7 30%, #FFFFFF 100%)",

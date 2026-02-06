@@ -54,7 +54,7 @@ export function ProblemSection() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.6 }}
-      className="flex flex-col justify-center min-h-screen py-12 snap-start snap-always md:py-16"
+      className="flex flex-col justify-center min-h-screen py-20 md:py-12 snap-start snap-always "
     >
       <div className="px-6 mx-auto max-w-7xl">
         <h2 className="mb-20 text-4xl font-bold text-center sm:text-5xl text-kkookk-navy break-keep">
