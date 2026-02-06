@@ -1,84 +1,116 @@
 /**
  * MigrationForm 컴포넌트
  * 고객이 종이 스탬프 전환 요청을 제출하기 위한 폼
+ * API 연동: createMigration({ storeId, imageData, claimedStampCount })
  */
 
 import { useState } from 'react';
-import { ChevronLeft, ChevronDown, Camera, Check, Info, AlertCircle } from 'lucide-react';
+import { ChevronLeft, Camera, Check, Info, AlertCircle, Loader2 } from 'lucide-react';
 import { useCustomerNavigate } from '@/hooks/useCustomerNavigate';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { MOCK_OTHER_CARDS, INITIAL_STAMP_CARD, MOCK_MIGRATIONS } from '@/lib/constants/mockData';
-import type { StampCard, MigrationRequest } from '@/types/domain';
+import { StepUpVerify } from '@/components/shared/StepUpVerify';
+import { isStepUpValid } from '@/lib/api/tokenManager';
+import { useCreateMigration, useMigrationList } from '@/features/migration/hooks/useMigration';
+import { useWalletStampCards } from '@/features/wallet/hooks/useWallet';
 
-interface MigrationFormProps {
-  cards?: StampCard[];
-  existingMigrations?: MigrationRequest[];
+/** File → Base64 data URI */
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
-export function MigrationForm({
-  cards = [INITIAL_STAMP_CARD, ...MOCK_OTHER_CARDS],
-  existingMigrations = MOCK_MIGRATIONS,
-}: MigrationFormProps) {
-  const { customerNavigate } = useCustomerNavigate();
+export function MigrationForm() {
+  const { storeId, customerNavigate } = useCustomerNavigate();
+  const storeIdNum = storeId ? Number(storeId) : undefined;
+
+  const [stepUpValid, setStepUpValid] = useState(isStepUpValid());
   const [count, setCount] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // 아직 전환 요청을 받을 수 있는 매장 확인
-  const availableStores = cards.map((card) => {
-    const isAlreadyApproved = existingMigrations.some(
-      (m) => m.storeName === card.storeName && m.status === 'approved'
-    );
-    const isPending = existingMigrations.some(
-      (m) => m.storeName === card.storeName && m.status === 'pending'
-    );
+  // Hooks
+  const { data: walletData } = useWalletStampCards(storeIdNum);
+  const { data: migrations } = useMigrationList();
+  const createMigration = useCreateMigration();
 
-    return {
-      ...card,
-      isDisabled: isAlreadyApproved || isPending,
-      statusText: isAlreadyApproved
-        ? '(전환 완료)'
-        : isPending
-          ? '(심사 중)'
-          : '',
-    };
-  });
+  // Store info from wallet
+  const storeName = walletData?.stampCards?.[0]?.store?.storeName ?? '현재 매장';
 
-  const initialStore = availableStores.find((s) => !s.isDisabled);
-  const [selectedStoreName, setSelectedStoreName] = useState(
-    initialStore?.storeName || ''
+  // Check if already has pending migration for this store
+  const hasPending = (migrations ?? []).some(
+    (m) => m.storeId === storeIdNum && m.status === 'SUBMITTED'
   );
 
-  const allStoresUsed = availableStores.every((s) => s.isDisabled);
+  const isFormValid =
+    count.trim() !== '' &&
+    Number(count) >= 1 &&
+    file !== null &&
+    !hasPending;
 
-  // 폼 유효성 검사
-  const isFormValid = selectedStoreName.trim() !== '' && count.trim() !== '' && file !== null;
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!storeIdNum || !file || !count) return;
 
-    if (!selectedStoreName) {
-      alert('매장을 선택해주세요.');
-      return;
+    setSubmitError(null);
+
+    try {
+      const imageData = await fileToBase64(file);
+
+      createMigration.mutate(
+        {
+          storeId: storeIdNum,
+          imageData,
+          claimedStampCount: parseInt(count, 10),
+        },
+        {
+          onSuccess: () => {
+            customerNavigate('/migrations');
+          },
+          onError: (error) => {
+            const err = error as { response?: { status?: number } };
+            if (err.response?.status === 409) {
+              setSubmitError('이미 심사 중인 전환 신청이 있습니다.');
+            } else if (err.response?.status === 413) {
+              setSubmitError('이미지 크기가 너무 큽니다. (최대 5MB)');
+            } else if (err.response?.status === 403) {
+              setSubmitError('본인 인증이 만료되었습니다. 다시 인증해주세요.');
+              setStepUpValid(false);
+            } else {
+              setSubmitError('전환 신청에 실패했습니다. 다시 시도해주세요.');
+            }
+          },
+        }
+      );
+    } catch {
+      setSubmitError('이미지 처리 중 오류가 발생했습니다.');
     }
-
-    const selectedStore = availableStores.find(
-      (s) => s.storeName === selectedStoreName
-    );
-    if (selectedStore?.isDisabled) {
-      alert('이미 전환 신청이 완료되었거나 진행 중인 매장입니다.');
-      return;
-    }
-
-    if (!count || !file) {
-      alert('모든 정보를 입력해주세요.');
-      return;
-    }
-
-    // TODO: API 연동 후 실제 제출 처리
-    console.log('Migration submitted:', selectedStoreName, parseInt(count), file);
-    customerNavigate('/migrations');
   };
+
+  // StepUp 인증 필요
+  if (!stepUpValid) {
+    return (
+      <div className="h-full bg-white flex flex-col pt-12">
+        <div className="px-6 py-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center sticky top-0 bg-white z-10 -mt-12 pt-12">
+          <button
+            onClick={() => customerNavigate('/migrations')}
+            className="p-2 -ml-2 text-kkookk-steel hover:text-kkookk-navy"
+            aria-label="뒤로 가기"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <h1 className="font-bold text-lg ml-2 text-kkookk-navy">전환 신청하기</h1>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <StepUpVerify onVerified={() => setStepUpValid(true)} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full bg-white flex flex-col pt-12">
@@ -107,46 +139,23 @@ export function MigrationForm({
         </div>
 
         <div className="space-y-6">
-          {/* 매장 선택 */}
+          {/* 매장 정보 */}
           <div>
-            <label
-              htmlFor="store-select"
-              className="block text-sm font-bold text-kkookk-navy mb-2"
-            >
-              매장 선택 <span className="text-kkookk-orange-500">*</span>
+            <label className="block text-sm font-bold text-kkookk-navy mb-2">
+              매장
             </label>
-            <div className="relative">
-              <select
-                id="store-select"
-                value={selectedStoreName}
-                onChange={(e) => setSelectedStoreName(e.target.value)}
-                className="w-full p-4 bg-kkookk-sand rounded-xl border border-slate-200 focus:outline-none appearance-none pr-10 text-kkookk-navy font-medium disabled:bg-slate-100 disabled:text-slate-400"
-                disabled={allStoresUsed}
-              >
-                {availableStores.map((store) => (
-                  <option
-                    key={store.id}
-                    value={store.storeName}
-                    disabled={store.isDisabled}
-                  >
-                    {store.storeName} {store.statusText}
-                  </option>
-                ))}
-                {availableStores.length === 0 && (
-                  <option disabled>보유한 스탬프 카드가 없습니다</option>
-                )}
-              </select>
-              <ChevronDown
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-kkookk-steel pointer-events-none"
-                size={20}
-              />
+            <div className="w-full p-4 bg-kkookk-sand rounded-xl border border-slate-200 text-kkookk-navy font-medium">
+              {storeName}
             </div>
-            {allStoresUsed && (
-              <p className="text-xs text-kkookk-red mt-2 flex items-center gap-1">
-                <AlertCircle size={12} /> 모든 매장의 전환 신청이 완료되었습니다.
-              </p>
-            )}
           </div>
+
+          {/* 이미 심사중인 경우 경고 */}
+          {hasPending && (
+            <div className="flex items-center gap-2 p-4 text-sm text-amber-700 bg-amber-50 rounded-xl">
+              <AlertCircle size={16} className="shrink-0" />
+              <span>이 매장에 이미 심사 중인 전환 신청이 있습니다.</span>
+            </div>
+          )}
 
           {/* 스탬프 개수 */}
           <div>
@@ -160,6 +169,7 @@ export function MigrationForm({
               onChange={(e) => setCount(e.target.value)}
               placeholder="0"
               min={1}
+              disabled={hasPending}
             />
           </div>
 
@@ -178,6 +188,7 @@ export function MigrationForm({
                 accept="image/*"
                 className="absolute inset-0 opacity-0 cursor-pointer"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
+                disabled={hasPending}
               />
               <div className="flex flex-col items-center text-kkookk-steel">
                 {file ? (
@@ -196,6 +207,14 @@ export function MigrationForm({
               </div>
             </div>
           </div>
+
+          {/* 에러 메시지 */}
+          {submitError && (
+            <div className="flex items-center gap-2 p-4 text-sm text-red-700 bg-red-50 rounded-xl">
+              <AlertCircle size={16} className="shrink-0" />
+              <span>{submitError}</span>
+            </div>
+          )}
         </div>
       </form>
 
@@ -203,12 +222,19 @@ export function MigrationForm({
       <div className="p-6 border-t border-slate-100">
         <Button
           onClick={handleSubmit}
-          disabled={allStoresUsed || !isFormValid}
+          disabled={!isFormValid || createMigration.isPending}
           variant="primary"
           size="full"
           className="shadow-lg"
         >
-          제출하기
+          {createMigration.isPending ? (
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              제출 중...
+            </>
+          ) : (
+            '제출하기'
+          )}
         </Button>
       </div>
     </div>

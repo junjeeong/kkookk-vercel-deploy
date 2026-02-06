@@ -7,7 +7,6 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
-  useInfiniteQuery,
 } from '@tanstack/react-query';
 import {
   getStores,
@@ -17,8 +16,10 @@ import {
   deleteStore,
   getStoreQR,
   getStoreStatistics,
+  getStampEvents,
   getRedeemEvents,
   type GetStoreStatisticsParams,
+  type GetStampEventsParams,
   type GetRedeemEventsParams,
 } from '../api/storeApi';
 import { QUERY_KEYS } from '@/lib/api/endpoints';
@@ -132,6 +133,25 @@ export function useStoreStatistics(
 }
 
 // =============================================================================
+// Stamp Events Hook
+// =============================================================================
+
+export function useStampEvents(
+  params: Omit<GetStampEventsParams, 'storeId'> & { storeId?: number }
+) {
+  return useQuery({
+    queryKey: QUERY_KEYS.storeStampEvents(params.storeId ?? 0),
+    queryFn: () =>
+      getStampEvents({
+        storeId: params.storeId!,
+        page: params.page,
+        size: params.size,
+      }),
+    enabled: !!params.storeId,
+  });
+}
+
+// =============================================================================
 // Redeem Events Hook
 // =============================================================================
 
@@ -147,25 +167,5 @@ export function useRedeemEvents(
         size: params.size,
       }),
     enabled: !!params.storeId,
-  });
-}
-
-export function useRedeemEventsInfinite(storeId: number | undefined, pageSize = 20) {
-  return useInfiniteQuery({
-    queryKey: [...QUERY_KEYS.storeRedeemEvents(storeId ?? 0), 'infinite'],
-    queryFn: ({ pageParam = 0 }) =>
-      getRedeemEvents({
-        storeId: storeId!,
-        page: pageParam,
-        size: pageSize,
-      }),
-    getNextPageParam: (lastPage) => {
-      if (!lastPage.isLast) {
-        return lastPage.pageNumber + 1;
-      }
-      return undefined;
-    },
-    initialPageParam: 0,
-    enabled: !!storeId,
   });
 }

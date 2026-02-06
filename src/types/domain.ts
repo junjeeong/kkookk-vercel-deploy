@@ -75,6 +75,8 @@ export type MigrationStatus = 'pending' | 'approved' | 'rejected';
 export interface MigrationRequest {
   id: string;
   storeName: string;
+  customerName?: string;
+  customerPhone?: string;
   count: number;
   status: MigrationStatus;
   date: Date;

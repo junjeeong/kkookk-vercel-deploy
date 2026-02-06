@@ -57,6 +57,7 @@ export const API_ENDPOINTS = {
     STORE: (storeId: number) => `/api/owner/stores/${storeId}`,
     STORE_QR: (storeId: number) => `/api/owner/stores/${storeId}/qr`,
     STORE_STATISTICS: (storeId: number) => `/api/owner/stores/${storeId}/statistics`,
+    STORE_STAMP_EVENTS: (storeId: number) => `/api/owner/stores/${storeId}/stamp-events`,
     STORE_REDEEM_EVENTS: (storeId: number) => `/api/owner/stores/${storeId}/redeem-events`,
 
     // Stamp Cards
@@ -87,6 +88,7 @@ export const API_ENDPOINTS = {
     REJECT_ISSUANCE: (storeId: number, requestId: number) =>
       `/api/terminal/${storeId}/issuance-requests/${requestId}/reject`,
     REDEEM_SESSIONS: (storeId: number) => `/api/terminal/${storeId}/redeem-sessions`,
+    STAMP_EVENTS: (storeId: number) => `/api/terminal/stores/${storeId}/stamp-events`,
   },
 } as const;
 
@@ -109,6 +111,8 @@ export const QUERY_KEYS = {
   storeQr: (storeId: number) => ['owner', 'store', storeId, 'qr'] as const,
   storeStatistics: (storeId: number, startDate?: string, endDate?: string) =>
     ['owner', 'store', storeId, 'statistics', { startDate, endDate }] as const,
+  storeStampEvents: (storeId: number) =>
+    ['owner', 'store', storeId, 'stampEvents'] as const,
   storeRedeemEvents: (storeId: number) =>
     ['owner', 'store', storeId, 'redeemEvents'] as const,
   stampCards: (storeId: number, status?: string) =>

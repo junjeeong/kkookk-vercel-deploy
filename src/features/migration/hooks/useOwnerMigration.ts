@@ -6,7 +6,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getStoreMigrations,
-  getStoreMigration,
+  getStoreMigrationDetail,
   approveMigration,
   rejectMigration,
 } from '../api/migrationApi';
@@ -29,13 +29,13 @@ export function useStoreMigrations(storeId: number | undefined) {
 // Single Store Migration Hook
 // =============================================================================
 
-export function useStoreMigration(
+export function useStoreMigrationDetail(
   storeId: number | undefined,
   migrationId: number | undefined
 ) {
   return useQuery({
     queryKey: QUERY_KEYS.storeMigration(storeId ?? 0, migrationId ?? 0),
-    queryFn: () => getStoreMigration(storeId!, migrationId!),
+    queryFn: () => getStoreMigrationDetail(storeId!, migrationId!),
     enabled: !!storeId && !!migrationId,
   });
 }

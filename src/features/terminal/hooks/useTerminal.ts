@@ -10,6 +10,7 @@ import {
   approveIssuanceRequest,
   rejectIssuanceRequest,
   getPendingRedeemSessions,
+  getTerminalStampEvents,
 } from '../api/terminalApi';
 import { setAuthToken, setUserInfo } from '@/lib/api/tokenManager';
 import { QUERY_KEYS } from '@/lib/api/endpoints';
@@ -158,5 +159,17 @@ export function usePendingRedeemSessions(
       }
       return failureCount < 3;
     },
+  });
+}
+
+// =============================================================================
+// Terminal Stamp Events Hook
+// =============================================================================
+
+export function useTerminalStampEvents(storeId: number | undefined) {
+  return useQuery({
+    queryKey: QUERY_KEYS.storeStampEvents(storeId ?? 0),
+    queryFn: () => getTerminalStampEvents(storeId!),
+    enabled: !!storeId,
   });
 }

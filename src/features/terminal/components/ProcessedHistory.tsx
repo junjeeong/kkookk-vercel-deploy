@@ -5,19 +5,22 @@
 
 import { formatTime } from '@/lib/utils/format';
 import { Badge } from '@/components/ui/Badge';
-import type { IssuanceRequest } from '@/types/domain';
 
-interface ProcessedHistoryProps {
-  requests: IssuanceRequest[];
+interface HistoryItem {
+  id: string;
+  type: 'stamp' | 'reward';
+  user: string;
+  phone: string;
+  time: Date;
+  status: 'approved' | 'rejected';
+  content: string;
 }
 
-export function ProcessedHistory({ requests }: ProcessedHistoryProps) {
-  // 이미 approved/rejected 상태만 전달되므로 추가 필터 불필요
-  // 최신순 정렬
-  const sorted = [...requests].sort(
-    (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
-  );
+interface ProcessedHistoryProps {
+  items: HistoryItem[];
+}
 
+export function ProcessedHistory({ items }: ProcessedHistoryProps) {
   return (
     <>
       <div className="p-6 pb-2">
@@ -35,7 +38,7 @@ export function ProcessedHistory({ requests }: ProcessedHistoryProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {sorted.length === 0 ? (
+              {items.length === 0 ? (
                 <tr>
                   <td
                     colSpan={4}
@@ -45,29 +48,27 @@ export function ProcessedHistory({ requests }: ProcessedHistoryProps) {
                   </td>
                 </tr>
               ) : (
-                sorted.map((req) => (
+                items.map((item) => (
                   <tr
-                    key={`${req.id}-${req.status}`}
+                    key={item.id}
                     className="hover:bg-slate-50 transition-colors"
                   >
                     <td className="p-4 text-sm text-kkookk-navy font-mono">
-                      {formatTime(req.time)}
+                      {formatTime(item.time)}
                     </td>
                     <td className="p-4 text-sm text-kkookk-navy font-bold">
-                      {req.user}
+                      {item.user}
                     </td>
                     <td className="p-4 text-sm text-kkookk-navy">
-                      {req.type === 'stamp'
-                        ? `스탬프 +${req.count}개`
-                        : '리워드 사용'}
+                      {item.content}
                     </td>
                     <td className="p-4">
                       <Badge
                         variant={
-                          req.status === 'approved' ? 'success' : 'destructive'
+                          item.status === 'approved' ? 'success' : 'destructive'
                         }
                       >
-                        {req.status === 'approved' ? '승인됨' : '거절됨'}
+                        {item.status === 'approved' ? '승인됨' : '거절됨'}
                       </Badge>
                     </td>
                   </tr>

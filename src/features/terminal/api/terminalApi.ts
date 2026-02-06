@@ -12,6 +12,8 @@ import type {
   IssuanceApprovalResponse,
   IssuanceRejectionResponse,
   PendingRedeemSessionListResponse,
+  StampEventResponse,
+  PageResponse,
 } from '@/types/api';
 
 // =============================================================================
@@ -66,5 +68,20 @@ export async function getPendingRedeemSessions(
 ): Promise<PendingRedeemSessionListResponse> {
   return getRaw<PendingRedeemSessionListResponse>(
     API_ENDPOINTS.TERMINAL.REDEEM_SESSIONS(storeId)
+  );
+}
+
+// =============================================================================
+// Terminal Stamp Events (Terminal JWT)
+// =============================================================================
+
+export async function getTerminalStampEvents(
+  storeId: number,
+  page = 0,
+  size = 20
+): Promise<PageResponse<StampEventResponse>> {
+  return getRaw<PageResponse<StampEventResponse>>(
+    API_ENDPOINTS.TERMINAL.STAMP_EVENTS(storeId),
+    { page, size }
   );
 }
