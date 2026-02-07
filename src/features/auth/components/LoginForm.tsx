@@ -12,22 +12,42 @@ interface LoginFormProps {
   onSubmit: (email: string, password: string) => void;
   onSwitchToSignup: () => void;
   isLoading?: boolean;
+  serverError?: string;
+  onServerErrorClear?: () => void;
 }
 
 export function LoginForm({
   onSubmit,
   onSwitchToSignup,
   isLoading = false,
+  serverError,
+  onServerErrorClear,
 }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      alert("이메일과 비밀번호를 입력해주세요.");
-      return;
+
+    // Reset errors
+    setEmailError("");
+    setPasswordError("");
+
+    // Validate
+    let hasError = false;
+    if (!email) {
+      setEmailError("이메일을 입력해주세요.");
+      hasError = true;
     }
+    if (!password) {
+      setPasswordError("비밀번호를 입력해주세요.");
+      hasError = true;
+    }
+
+    if (hasError) return;
+
     onSubmit(email, password);
   };
 
@@ -40,22 +60,32 @@ export function LoginForm({
         type="email"
         label="이메일"
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={(e) => {
+          setEmail(e.target.value);
+          if (emailError) setEmailError("");
+          if (serverError && onServerErrorClear) onServerErrorClear();
+        }}
         placeholder="boss@partner.com"
         icon={<Mail size={18} />}
         autoComplete="email"
         className="focus:border-indigo-600!"
+        error={emailError}
       />
 
       <Input
         type="password"
         label="비밀번호"
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        onChange={(e) => {
+          setPassword(e.target.value);
+          if (passwordError) setPasswordError("");
+          if (serverError && onServerErrorClear) onServerErrorClear();
+        }}
         placeholder="••••••••"
         icon={<Lock size={18} />}
         autoComplete="current-password"
         className="focus:border-indigo-600!"
+        error={passwordError || serverError}
       />
 
       <Button

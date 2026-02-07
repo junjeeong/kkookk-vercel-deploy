@@ -23,7 +23,7 @@ interface OwnerLoginPageProps {
 }
 
 export function OwnerLoginPage({
-  title = "사장님 백오피스",
+  title = "사장님",
   subtitle = "",
   onLoginSuccess,
   onLoginSuccessWithCredentials,
@@ -56,6 +56,13 @@ export function OwnerLoginPage({
     }
   };
   const [authMode, setAuthMode] = useState<AuthMode>("login");
+
+  // authMode에 따라 동적으로 제목 생성
+  const displayTitle = authMode === "login"
+    ? `${title} 로그인`
+    : authMode === "signup"
+    ? `${title} 회원가입`
+    : title;
   const [phone, setPhone] = useState("");
   const [signupData, setSignupData] = useState<{
     name: string;
@@ -63,10 +70,14 @@ export function OwnerLoginPage({
     email: string;
     password: string;
   } | null>(null);
+  const [verificationError, setVerificationError] = useState("");
+  const [loginError, setLoginError] = useState("");
 
   const isLoading = ownerLogin.isPending || ownerSignup.isPending || otpRequest.isPending || otpVerify.isPending;
 
   const handleLogin = (email: string, password: string) => {
+    setLoginError("");
+
     ownerLogin.mutate(
       { email, password },
       {
@@ -75,7 +86,7 @@ export function OwnerLoginPage({
           handleLoginSuccess();
         },
         onError: (error) => {
-          alert("로그인 실패: 이메일 또는 비밀번호를 확인해주세요.");
+          setLoginError("로그인 실패: 이메일 또는 비밀번호를 확인해주세요.");
           console.error("Login error:", error);
         },
       }
@@ -114,6 +125,8 @@ export function OwnerLoginPage({
   const handleVerify = (code: string) => {
     if (!signupData) return;
 
+    setVerificationError("");
+
     otpVerify.mutate(
       { phone, code },
       {
@@ -132,19 +145,20 @@ export function OwnerLoginPage({
                   alert("회원가입이 완료되었습니다. 로그인해주세요.");
                   setAuthMode("login");
                   setSignupData(null);
+                  setVerificationError("");
                 },
                 onError: (error) => {
-                  alert("회원가입 실패. 이미 등록된 이메일일 수 있습니다.");
+                  setVerificationError("회원가입 실패. 이미 등록된 이메일일 수 있습니다.");
                   console.error("Signup error:", error);
                 },
               }
             );
           } else {
-            alert("인증번호가 일치하지 않습니다.");
+            setVerificationError("인증번호가 일치하지 않습니다.");
           }
         },
         onError: (error) => {
-          alert("인증 실패. 인증번호를 확인해주세요.");
+          setVerificationError("인증 실패. 인증번호를 확인해주세요.");
           console.error("OTP verify error:", error);
         },
       }
@@ -177,7 +191,7 @@ export function OwnerLoginPage({
         className={`bg-white rounded-3xl shadow-xl p-8 w-full ${isTabletMode ? "max-w-sm border border-slate-100" : "max-w-md border border-slate-200"}`}
       >
         <div className="mb-8 text-center">
-          <h2 className="mb-2 text-2xl font-bold text-kkookk-navy">{title}</h2>
+          <h2 className="mb-2 text-2xl font-bold text-kkookk-navy">{displayTitle}</h2>
           {subtitle && <p className="text-sm text-kkookk-steel">{subtitle}</p>}
         </div>
 
@@ -186,6 +200,8 @@ export function OwnerLoginPage({
             onSubmit={handleLogin}
             onSwitchToSignup={() => setAuthMode("signup")}
             isLoading={isLoading}
+            serverError={loginError}
+            onServerErrorClear={() => setLoginError("")}
           />
         )}
 
@@ -204,6 +220,8 @@ export function OwnerLoginPage({
             onResend={handleResend}
             onBack={() => setAuthMode("signup")}
             isLoading={isLoading}
+            error={verificationError}
+            onErrorClear={() => setVerificationError("")}
           />
         )}
       </div>

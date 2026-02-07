@@ -14,6 +14,8 @@ interface PhoneVerificationProps {
   onResend: () => void;
   onBack: () => void;
   isLoading?: boolean;
+  error?: string;
+  onErrorClear?: () => void;
 }
 
 export function PhoneVerification({
@@ -22,13 +24,21 @@ export function PhoneVerification({
   onResend,
   onBack,
   isLoading = false,
+  error,
+  onErrorClear,
 }: PhoneVerificationProps) {
   const [verificationCode, setVerificationCode] = useState('');
+  const [localError, setLocalError] = useState('');
+
+  const displayError = error || localError;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    setLocalError('');
+
     if (!verificationCode) {
-      alert('인증번호를 입력해주세요.');
+      setLocalError('인증번호를 입력해주세요.');
       return;
     }
     onVerify(verificationCode);
@@ -53,13 +63,18 @@ export function PhoneVerification({
         type="text"
         label="인증번호"
         value={verificationCode}
-        onChange={(e) => setVerificationCode(e.target.value)}
+        onChange={(e) => {
+          setVerificationCode(e.target.value);
+          if (localError) setLocalError('');
+          if (error && onErrorClear) onErrorClear();
+        }}
         placeholder="123456"
         icon={<KeyRound size={18} />}
         className="tracking-widest font-mono focus:border-indigo-600!"
         maxLength={6}
         inputMode="numeric"
         autoComplete="one-time-code"
+        error={displayError}
       />
 
       <Button
