@@ -6,19 +6,23 @@
 import { Button } from "@/components/ui/Button";
 import { useCustomerNavigate } from "@/hooks/useCustomerNavigate";
 import { useStorePublicInfo } from "@/hooks/useStorePublicInfo";
-import { Loader2, AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 
 export function CustomerLandingPage() {
   const { storeId, customerNavigate } = useCustomerNavigate();
-  const { data: storeInfo, isLoading, error } = useStorePublicInfo(
-    storeId ? Number(storeId) : undefined,
-  );
+  const {
+    data: storeInfo,
+    isLoading,
+    error,
+  } = useStorePublicInfo(storeId ? Number(storeId) : undefined);
 
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-8 bg-white">
         <Loader2 className="w-8 h-8 animate-spin text-kkookk-orange-500" />
-        <p className="mt-4 text-sm text-kkookk-steel">매장 정보를 불러오는 중...</p>
+        <p className="mt-4 text-sm text-kkookk-steel">
+          매장 정보를 불러오는 중...
+        </p>
       </div>
     );
   }
@@ -27,8 +31,12 @@ export function CustomerLandingPage() {
     return (
       <div className="flex flex-col items-center justify-center h-full p-8 bg-white">
         <AlertCircle className="w-12 h-12 text-red-500" />
-        <p className="mt-4 text-lg font-medium text-kkookk-navy">매장을 찾을 수 없습니다</p>
-        <p className="mt-1 text-sm text-kkookk-steel">QR 코드를 다시 스캔해주세요</p>
+        <p className="mt-4 text-lg font-medium text-kkookk-navy">
+          매장을 찾을 수 없습니다
+        </p>
+        <p className="mt-1 text-sm text-kkookk-steel">
+          QR 코드를 다시 스캔해주세요
+        </p>
       </div>
     );
   }
@@ -43,7 +51,7 @@ export function CustomerLandingPage() {
           alt="KKOOKK Customer"
           className="mb-2 w-26 h-26 "
         />
-        <h2 className="mb-3 text-2xl font-bold leading-tight text-kkookk-navy">
+        <h2 className="mb-3 text-2xl font-bold leading-tight text-kkookk-navy ">
           {storeName}에
           <br />
           오신 것을 환영해요!

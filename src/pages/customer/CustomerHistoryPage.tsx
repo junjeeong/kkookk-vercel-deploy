@@ -3,14 +3,14 @@
  * 고객 활동 이력 페이지 (스탬프 적립 + 리워드 사용 통합)
  */
 
-import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, History, Check, Gift, Loader2 } from 'lucide-react';
 import { useCustomerNavigate } from '@/hooks/useCustomerNavigate';
 import { formatFullDateTime } from '@/lib/utils/format';
 import { useStampHistory, useRedeemHistory } from '@/features/wallet/hooks/useWallet';
-import { isStepUpValid } from '@/lib/api/tokenManager';
-import { StepUpVerify } from '@/components/shared/StepUpVerify';
+import { useStepUpModal } from '@/app/providers/StepUpModalProvider';
 
 type HistoryFilter = 'all' | 'stamp' | 'reward';
 
@@ -23,13 +23,30 @@ interface HistoryEntry {
 }
 
 export function CustomerHistoryPage() {
-  const { storeId: defaultStoreId, customerNavigate } = useCustomerNavigate();
+  const { storeId: defaultStoreId, customerNavigate, customerPath } = useCustomerNavigate();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [filter, setFilter] = useState<HistoryFilter>('all');
-  const [stepUpValid, setStepUpValid] = useState(isStepUpValid());
+  const { isVerified, openStepUpModal } = useStepUpModal();
+  const queryClient = useQueryClient();
 
   // query param 우선, 없으면 sessionStorage/URL fallback
   const storeIdNum = Number(searchParams.get('storeId')) || (defaultStoreId ? Number(defaultStoreId) : undefined);
+
+  // 본인인증 체크 및 모달 트리거
+  useEffect(() => {
+    if (!isVerified) {
+      // 인증 안 되어 있으면 지갑 페이지로 돌아가고 모달 열기
+      navigate(customerPath('/wallet'), { replace: true });
+      openStepUpModal(() => {
+        // 인증 완료 후 쿼리 무효화 및 페이지 이동
+        queryClient.invalidateQueries({ queryKey: ['stampHistory'] });
+        queryClient.invalidateQueries({ queryKey: ['redeemHistory'] });
+        const query = storeIdNum ? `?storeId=${storeIdNum}` : '';
+        navigate(customerPath(`/history${query}`));
+      });
+    }
+  }, [isVerified, openStepUpModal, queryClient, navigate, customerPath, storeIdNum]);
 
   // 스탬프 적립 이력 (StepUp 필요)
   const { data: stampData, isLoading: stampLoading } = useStampHistory(storeIdNum);
@@ -112,11 +129,7 @@ export function CustomerHistoryPage() {
 
       {/* 목록 */}
       <div className="flex-1 overflow-y-auto px-6">
-        {!stepUpValid ? (
-          <div className="flex items-center justify-center py-16">
-            <StepUpVerify onVerified={() => setStepUpValid(true)} />
-          </div>
-        ) : isLoading ? (
+        {isLoading ? (
           <div className="flex flex-col items-center justify-center h-64 text-kkookk-steel">
             <Loader2 size={32} className="animate-spin opacity-40 mb-4" />
             <p>이력을 불러오는 중...</p>

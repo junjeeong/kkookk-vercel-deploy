@@ -30,7 +30,10 @@ export function StampCardCarousel({
       const scrollLeft = target.scrollLeft;
       const width = target.offsetWidth;
       const cardWidth = width * 0.85;
-      const index = Math.min(Math.max(Math.round(scrollLeft / cardWidth), 0), cards.length - 1);
+      const index = Math.min(
+        Math.max(Math.round(scrollLeft / cardWidth), 0),
+        cards.length - 1,
+      );
       if (index !== currentIndex) {
         setCurrentIndex(index);
         onCardChange?.(cards[index]);
@@ -40,7 +43,7 @@ export function StampCardCarousel({
   );
 
   return (
-    <div className={cn("flex flex-col", className)}>
+    <div className={cn("flex flex-col mb-20", className)}>
       {/* 캐러셀 */}
       {cards.length === 1 ? (
         <div className="flex justify-center px-6 py-6">

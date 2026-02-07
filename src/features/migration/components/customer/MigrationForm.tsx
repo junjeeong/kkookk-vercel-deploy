@@ -113,26 +113,28 @@ export function MigrationForm() {
   }
 
   return (
-    <div className="h-full bg-white flex flex-col pt-12">
+    <div className="flex flex-col h-full pt-12 pb-10 bg-white">
       {/* 헤더 */}
-      <div className="px-6 py-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center sticky top-0 bg-white z-10 -mt-12 pt-12">
+      <div className="px-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center sticky top-0 bg-white z-10 -mt-12 py-4">
         <button
-          onClick={() => customerNavigate('/migrations')}
+          onClick={() => customerNavigate("/migrations")}
           className="p-2 -ml-2 text-kkookk-steel hover:text-kkookk-navy"
           aria-label="뒤로 가기"
         >
           <ChevronLeft size={24} />
         </button>
-        <h1 className="font-bold text-lg ml-2 text-kkookk-navy">전환 신청하기</h1>
+        <h1 className="ml-2 text-lg font-bold text-kkookk-navy">
+          전환 신청하기
+        </h1>
       </div>
 
       {/* 폼 콘텐츠 */}
-      <form onSubmit={handleSubmit} className="p-6 flex-1 overflow-y-auto">
+      <form onSubmit={handleSubmit} className="flex-1 p-6 overflow-y-auto">
         {/* 안내 배너 */}
-        <div className="bg-blue-50 p-4 rounded-xl flex gap-3 mb-8 text-blue-800 text-xs leading-relaxed">
+        <div className="flex gap-3 p-4 mb-8 text-xs leading-relaxed text-blue-800 bg-blue-50 rounded-xl">
           <Info size={20} className="shrink-0" />
           <div>
-            <p className="font-bold mb-1">안내사항</p>
+            <p className="mb-1 font-bold">안내사항</p>
             <p>• 매장별로 1회만 전환 신청이 가능합니다.</p>
             <p>• 신청 후 승인까지 약 24~48시간 소요됩니다.</p>
           </div>
@@ -159,7 +161,10 @@ export function MigrationForm() {
 
           {/* 스탬프 개수 */}
           <div>
-            <label htmlFor="count-input" className="block text-xs font-bold text-kkookk-navy mb-2">
+            <label
+              htmlFor="count-input"
+              className="block mb-2 text-xs font-bold text-kkookk-navy"
+            >
               보유 스탬프 개수 <span className="text-kkookk-orange-500">*</span>
             </label>
             <Input
@@ -177,11 +182,12 @@ export function MigrationForm() {
           <div>
             <label
               htmlFor="photo-upload"
-              className="block text-sm font-bold text-kkookk-navy mb-2"
+              className="block mb-2 text-sm font-bold text-kkookk-navy"
             >
-              종이 쿠폰 사진 첨부 <span className="text-kkookk-orange-500">*</span>
+              종이 쿠폰 사진 첨부{" "}
+              <span className="text-kkookk-orange-500">*</span>
             </label>
-            <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center bg-kkookk-sand/30 hover:bg-kkookk-sand cursor-pointer transition-colors relative">
+            <div className="relative p-8 text-center transition-colors border-2 border-dashed cursor-pointer border-slate-300 rounded-xl bg-kkookk-sand/30 hover:bg-kkookk-sand">
               <input
                 id="photo-upload"
                 type="file"
@@ -193,7 +199,7 @@ export function MigrationForm() {
               <div className="flex flex-col items-center text-kkookk-steel">
                 {file ? (
                   <>
-                    <Check size={32} className="text-green-500 mb-2" />
+                    <Check size={32} className="mb-2 text-green-500" />
                     <p className="text-sm font-bold text-kkookk-navy">
                       {file.name}
                     </p>
@@ -219,7 +225,7 @@ export function MigrationForm() {
       </form>
 
       {/* 제출 버튼 */}
-      <div className="p-6 border-t border-slate-100">
+      <div className="px-6">
         <Button
           onClick={handleSubmit}
           disabled={!isFormValid || createMigration.isPending}
