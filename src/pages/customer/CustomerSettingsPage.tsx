@@ -3,18 +3,16 @@
  * 고객 앱 설정 페이지
  */
 
-import { useState } from 'react';
 import { ChevronLeft, ChevronRight, ShieldCheck, Clock } from 'lucide-react';
 import { useCustomerNavigate } from '@/hooks/useCustomerNavigate';
-import { isStepUpValid, getStepUpRemainingSeconds } from '@/lib/api/tokenManager';
-import { StepUpVerify } from '@/components/shared/StepUpVerify';
+import { getStepUpRemainingSeconds } from '@/lib/api/tokenManager';
+import { useStepUpModal } from '@/app/providers/StepUpModalProvider';
 
 export function CustomerSettingsPage() {
   const { customerNavigate } = useCustomerNavigate();
-  const [stepUpValid, setStepUpValid] = useState(isStepUpValid());
-  const [showOtpFlow, setShowOtpFlow] = useState(false);
+  const { isVerified, openStepUpModal } = useStepUpModal();
 
-  const remainingSec = stepUpValid ? getStepUpRemainingSeconds() : 0;
+  const remainingSec = isVerified ? getStepUpRemainingSeconds() : 0;
   const remainingMin = Math.ceil(remainingSec / 60);
 
   return (
@@ -37,15 +35,15 @@ export function CustomerSettingsPage() {
         <div className="p-4 border-b border-slate-50">
           <div
             className="flex justify-between items-center cursor-pointer"
-            onClick={() => !stepUpValid && setShowOtpFlow(!showOtpFlow)}
-            role={stepUpValid ? undefined : 'button'}
-            tabIndex={stepUpValid ? undefined : 0}
+            onClick={() => !isVerified && openStepUpModal()}
+            role={isVerified ? undefined : 'button'}
+            tabIndex={isVerified ? undefined : 0}
           >
             <div className="flex items-center gap-3">
-              <ShieldCheck size={20} className={stepUpValid ? 'text-green-500' : 'text-kkookk-steel'} />
+              <ShieldCheck size={20} className={isVerified ? 'text-green-500' : 'text-kkookk-steel'} />
               <span className="text-kkookk-navy font-medium">본인 인증</span>
             </div>
-            {stepUpValid ? (
+            {isVerified ? (
               <div className="flex items-center gap-1.5 text-green-600">
                 <Clock size={14} />
                 <span className="text-xs font-medium">{remainingMin}분 남음</span>
@@ -56,18 +54,6 @@ export function CustomerSettingsPage() {
               </span>
             )}
           </div>
-
-          {/* 인라인 OTP 플로우 */}
-          {showOtpFlow && !stepUpValid && (
-            <div className="mt-4 pt-4 border-t border-slate-50">
-              <StepUpVerify
-                onVerified={() => {
-                  setStepUpValid(true);
-                  setShowOtpFlow(false);
-                }}
-              />
-            </div>
-          )}
         </div>
 
         {/* 알림 설정 (비활성) */}

@@ -66,6 +66,17 @@ export interface WalletRegisterRequest {
   phone: string;
   name: string;
   nickname: string;
+  storeId?: number;
+}
+
+export interface RegisteredStampCardInfo {
+  walletStampCardId: number;
+  stampCardId: number;
+  title: string;
+  goalStampCount: number;
+  designType: string;
+  designJson: string;
+  storeName: string;
 }
 
 export interface WalletRegisterResponse {
@@ -74,6 +85,7 @@ export interface WalletRegisterResponse {
   phone: string;
   name: string;
   nickname: string;
+  stampCard: RegisteredStampCardInfo | null;
 }
 
 export interface WalletLoginRequest {

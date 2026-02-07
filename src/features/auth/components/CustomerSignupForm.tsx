@@ -71,7 +71,7 @@ export function CustomerSignupForm() {
           }
           // OTP verified → register wallet
           walletRegister.mutate(
-            { phone, name, nickname },
+            { phone, name, nickname, storeId: storeId ? Number(storeId) : undefined },
             {
               onSuccess: () => {
                 if (storeId) saveOriginStoreId(storeId);

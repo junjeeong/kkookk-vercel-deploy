@@ -7,6 +7,7 @@ import { useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { WalletHeader } from '../components/WalletHeader';
+import { PwaBanner } from '../components/PwaBanner';
 import { StampCardCarousel } from '../components/StampCardCarousel';
 import { useWalletStampCards, useStoreSummary } from '../hooks/useWallet';
 import { useCustomerNavigate } from '@/hooks/useCustomerNavigate';
@@ -14,13 +15,13 @@ import { parseDesignJson } from '../utils/cardDesign';
 import type { StampCard } from '@/types/domain';
 
 interface CustomerLayoutContext {
-  setIsMenuOpen: (open: boolean) => void;
+  setIsSettingsOpen: (open: boolean) => void;
   setCurrentStoreId: (storeId: number | undefined) => void;
 }
 
 export function WalletPage() {
   const { storeId, customerNavigate } = useCustomerNavigate();
-  const { setIsMenuOpen, setCurrentStoreId } = useOutletContext<CustomerLayoutContext>();
+  const { setIsSettingsOpen, setCurrentStoreId } = useOutletContext<CustomerLayoutContext>();
   const storeIdNum = storeId ? Number(storeId) : undefined;
   const { data: storeSummary } = useStoreSummary(storeIdNum);
 
@@ -107,7 +108,7 @@ export function WalletPage() {
   if (isLoading) {
     return (
       <div className="flex-1 flex flex-col min-h-screen">
-        <WalletHeader onMenuClick={() => setIsMenuOpen(true)} />
+        <WalletHeader onSettingsClick={() => setIsSettingsOpen(true)} />
         <div className="flex-1 flex flex-col items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-kkookk-orange-500" />
           <p className="mt-4 text-kkookk-steel">지갑을 불러오는 중...</p>
@@ -120,7 +121,7 @@ export function WalletPage() {
   if (error) {
     return (
       <div className="flex-1 flex flex-col min-h-screen">
-        <WalletHeader onMenuClick={() => setIsMenuOpen(true)} />
+        <WalletHeader onSettingsClick={() => setIsSettingsOpen(true)} />
         <div className="flex-1 flex flex-col items-center justify-center p-8">
           <AlertCircle className="w-12 h-12 text-red-500" />
           <p className="mt-4 text-lg font-medium text-kkookk-navy">지갑을 불러올 수 없습니다</p>
@@ -140,7 +141,7 @@ export function WalletPage() {
   if (cards.length === 0) {
     return (
       <div className="flex-1 flex flex-col min-h-screen">
-        <WalletHeader onMenuClick={() => setIsMenuOpen(true)} />
+        <WalletHeader onSettingsClick={() => setIsSettingsOpen(true)} />
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <p className="text-lg font-medium text-kkookk-navy">아직 스탬프 카드가 없어요</p>
           <p className="mt-1 text-sm text-kkookk-steel">
@@ -153,7 +154,8 @@ export function WalletPage() {
 
   return (
     <div className="flex-1 flex flex-col min-h-screen">
-      <WalletHeader onMenuClick={() => setIsMenuOpen(true)} />
+      <PwaBanner />
+      <WalletHeader onSettingsClick={() => setIsSettingsOpen(true)} />
 
       <div className="flex-1 flex flex-col justify-center">
         <StampCardCarousel cards={cards} onCardSelect={handleCardSelect} onCardChange={handleCardChange} />
